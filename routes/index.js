@@ -4,7 +4,7 @@ var passport = require('passport');
 var mongoose = require('mongoose');
 var User = mongoose.model('User');
 var jwt = require('express-jwt');
-var auth = jwt({secret: 'SECRET', userProperty: 'payload'});
+var auth = jwt({secret:process.env.SECRET_VAR, userProperty: 'payload'});
 
 /* GET home page. */
 router.get('/', function(req, res, next) {

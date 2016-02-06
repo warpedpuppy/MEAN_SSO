@@ -1,18 +1,22 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
+
 
   .row
     .col-md-6.col-md-offset-3
       ui-view
 
 
+  script(type="text/ng-template" id="/home.html")
+    .page-header
+
+        h1(ng-show="isLoggedIn()") welcome home {{ currentUser() }}
+        h1(ng-hide="isLoggedIn()") you are not logged in.
 
   script(type="text/ng-template" id="/register.html")
     .page-header
-      h1 Flapper News
+      h1 mean authentication
 
     div(ng-show="error" class="alert alert-danger row")
       span {{ error.message }}
@@ -39,7 +43,7 @@ block content
 
   script(type="text/ng-template" id="/login.html")
     .page-header
-      h1 Flapper News
+      h1 mean authentication
 
     div(ng-show="error" class="alert alert-danger row")
       span {{ error.message }}

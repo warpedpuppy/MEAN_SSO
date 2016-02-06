@@ -4,11 +4,11 @@
 
 var app = angular.module('authentiction_app', ['ui.router']);
 
-app.controller('MainCtrl', ['$scope', function($scope){
+app.controller('MainCtrl', ['$scope','auth', function($scope, auth){
 
 
     $scope.isLoggedIn = auth.isLoggedIn;
-
+    $scope.currentUser = auth.currentUser;
 
 }]);
 app.controller('NavCtrl', [
@@ -98,12 +98,7 @@ app.config([
             .state('home', {
                 url: '/home',
                 templateUrl: '/home.html',
-                controller: 'MainCtrl',
-                resolve: {
-                    postPromise: ['posts', function(posts){
-                        return posts.getAll();
-                    }]
-                }
+                controller: 'MainCtrl'
             });
         $stateProvider.state('login', {
             url: '/login',
@@ -126,5 +121,5 @@ app.config([
                 }]
             });
 
-        $urlRouterProvider.otherwise('home');
+        $urlRouterProvider.otherwise('login');
     }]);

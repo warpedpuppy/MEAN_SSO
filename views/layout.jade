@@ -1,7 +1,7 @@
 doctype html
 html
   head
-    title= title
+    title mean authentication
     link(rel='stylesheet', href='/stylesheets/style.css')
     link(href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet")
     script(src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js")
@@ -10,17 +10,26 @@ html
 
   body(ng-app="authentiction_app")
 
+    nav.navbar.navbar-default.navbar-static-top(ng-controller="NavCtrl")
+      .container-fluid
+        .navbar-header
+          button(type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false")
+            span(class="sr-only") Toggle navigation
+            span(class="icon-bar")
+            span(class="icon-bar")
+            span(class="icon-bar")
 
-    nav(class="navbar navbar-default pull-right" ng-controller="NavCtrl")
-      ul(class="nav navbar-nav")
-        li(ng-show="isLoggedIn()")
-          a {{ currentUser() }}
-        li(ng-show="isLoggedIn()")
-          a(href="", ng-click="logOut()") Log Out
-        li(ng-hide="isLoggedIn()")
-          a(href="/#/login") Log In
-        li(ng-hide="isLoggedIn()")
-          a(href="/#/register") Register
+          a.navbar-brand mean authentication
 
+        .collapse.navbar-collapse#bs-example-navbar-collapse-1
+          ul.nav.navbar-nav.navbar-right
 
+            li(ng-show="isLoggedIn()")
+              a {{ currentUser() }}
+            li(ng-show="isLoggedIn()")
+              a(href="", ng-click="logOut()") Log Out
+            li(ng-hide="isLoggedIn()")
+              a(href="/#/login") Log In
+            li(ng-hide="isLoggedIn()")
+              a(href="/#/register") Register
     block content

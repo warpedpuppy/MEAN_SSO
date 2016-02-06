@@ -1,0 +1,56 @@
+extends layout
+
+block content
+  h1= title
+  p Welcome to #{title}
+
+  .row
+    .col-md-6.col-md-offset-3
+      ui-view
+
+
+
+  script(type="text/ng-template" id="/register.html")
+    .page-header
+      h1 Flapper News
+
+    div(ng-show="error" class="alert alert-danger row")
+      span {{ error.message }}
+
+    form(ng-submit="register()",style="margin-top:30px;")
+      h3 Register
+
+      .form-group
+        input(type="text",class="form-control",placeholder="Username",ng-model="user.username")/
+
+      .form-group
+        input(type="password",class="form-control",placeholder="Password",ng-model="user.password")/
+
+      button(type="submit" class="btn btn-primary") Register
+
+
+
+
+
+
+
+
+
+
+  script(type="text/ng-template" id="/login.html")
+    .page-header
+      h1 Flapper News
+
+    div(ng-show="error" class="alert alert-danger row")
+      span {{ error.message }}
+
+    form(ng-submit="logIn()",style="margin-top:30px;")
+      h3 Log In
+
+      .form-group
+        input(type="text",class="form-control",placeholder="Username",ng-model="user.username")/
+
+      .form-group
+        input(type="password",class="form-control",placeholder="Password",ng-model="user.password")/
+
+      button(type="submit" class="btn btn-primary") Log In

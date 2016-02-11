@@ -1,0 +1,12 @@
+extends layout
+
+block content
+  script(src="/javascripts/angularApp_Users.js")
+
+  .row
+    .col-md-6.col-md-offset-3
+      ui-view
+
+  script(type="text/ng-template" id="/home.html")
+    .page-header USERS
+      h2 {{ test.success }}

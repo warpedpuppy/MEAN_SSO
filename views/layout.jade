@@ -6,11 +6,11 @@ html
     link(href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet")
     script(src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js")
     script(src="http://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.10/angular-ui-router.js")
-    script(src="/javascripts/angularApp.js")
 
-  body(ng-app="authentiction_app")
 
-    nav.navbar.navbar-default.navbar-static-top(ng-controller="NavCtrl")
+  body(ng-app="authentication_app")
+
+    nav(class="navbar navbar-default navbar-static-top", ng-controller="NavCtrl")
       .container-fluid
         .navbar-header
           button(type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false")
@@ -24,8 +24,12 @@ html
         .collapse.navbar-collapse#bs-example-navbar-collapse-1
           ul.nav.navbar-nav.navbar-right
 
+            li
+              a(href='/#/protected') protected
+            li
+              a(href='/users') users
             li(ng-show="isLoggedIn()")
-              a {{ currentUser() }}
+              a(href='/') {{ currentUser() }}
             li(ng-show="isLoggedIn()")
               a(href="", ng-click="logOut()") Log Out
             li(ng-hide="isLoggedIn()")

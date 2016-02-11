@@ -8,8 +8,15 @@ var auth = jwt({secret:process.env.SECRET_VAR, userProperty: 'payload'});
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
+  res.render('index');
 });
+
+router.get('/protected',auth,function(req, res, next) {
+
+  res.json({success:"this is passed from the authenticated /protected post call"})
+
+});
+
 
 router.post('/login', function(req, res, next){
   if(!req.body.username || !req.body.password){
@@ -44,6 +51,5 @@ router.post('/register', function(req, res, next){
     return res.json({token: user.generateJWT()})
   });
 });
-
 
 module.exports = router;

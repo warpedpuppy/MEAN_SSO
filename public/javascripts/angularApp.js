@@ -2,16 +2,25 @@
  * Created by edwardwalther on 2/4/16.
  */
 
-var app = angular.module('authentiction_app', ['ui.router']);
+var app = angular.module('authentication_app', ['ui.router']);
 
-app.controller('MainCtrl', ['$scope','auth', function($scope, auth){
-
-
-    $scope.isLoggedIn = auth.isLoggedIn;
-    $scope.currentUser = auth.currentUser;
-
-}]);
 app.controller('NavCtrl', [
+    '$scope',
+    'auth',
+    function($scope, auth){
+        $scope.isLoggedIn = auth.isLoggedIn;
+        $scope.currentUser = auth.currentUser;
+        $scope.logOut = auth.logOut;
+    }]);
+app.controller('ProtectedCtrl',[
+    '$scope',
+        'test',
+    function($scope,test){
+
+        $scope.test = test.test;
+
+    }]);
+app.controller('UsersCtrl', [
     '$scope',
     'auth',
     function($scope, auth){
@@ -44,8 +53,33 @@ app.controller('AuthCtrl', [
             };
         }])
 
-app.factory('auth', ['$http', '$window', function($http, $window){
+app.controller('MainCtrl', ['$scope','auth',function($scope, auth){
+
+
+    $scope.isLoggedIn = auth.isLoggedIn;
+    $scope.currentUser = auth.currentUser;
+
+}]);
+
+app.factory('test', ['$http', 'auth', function($http,auth){
+    var o = {
+        test:[]
+    };
+    o.clear = function() {
+        o.test = [];
+    };
+    o.get_protected = function() {
+        return $http.get('/protected', {
+            headers: {Authorization: 'Bearer '+auth.getToken()}
+        }).success(function(data){
+            angular.copy(data, o.test);
+        });
+    };
+    return o;
+}])
+app.factory('auth', ['$http', '$window',  function($http, $window){
     var auth = {};
+
     auth.saveToken = function (token){
         $window.localStorage['generic-auth-token'] = token;
     };
@@ -83,7 +117,10 @@ app.factory('auth', ['$http', '$window', function($http, $window){
         });
     };
     auth.logOut = function(){
+        //test.clear();
+
         $window.localStorage.removeItem('generic-auth-token');
+        $window.location.href = "/";
     };
     return auth;
 }]);
@@ -106,10 +143,45 @@ app.config([
             controller: 'AuthCtrl',
             onEnter: ['$state', 'auth', function($state, auth){
                 if(auth.isLoggedIn()){
-                    $state.go('home');
+
+                    $state.go('protected');
+                }
+                else{
+
                 }
             }]
         })
+        $stateProvider.state('protected', {
+            url: '/protected',
+            templateUrl: '/protected.html',
+            controller: 'ProtectedCtrl',
+            onEnter: ['$state',  'auth', 'test',function($state,auth,test){
+
+
+
+                if(auth.isLoggedIn()){
+                    test.get_protected().success(function(data){
+                        //console.log('YES'+data.success)
+                    })
+
+                }
+                else{
+                    $state.go('login');
+                }
+            }]
+        })
+      /*  $stateProvider.state('users', {
+            url: '/users',
+            templateUrl: '/users.html',
+            controller: 'UsersCtrl',
+            onEnter: ['$state',  function($state){
+
+                alert("users")
+                if(auth.isLoggedIn()){
+                    $state.go('users');
+                }
+            }]
+        })*/
         $stateProvider.state('register', {
                 url: '/register',
                 templateUrl: '/register.html',

@@ -2,10 +2,17 @@ extends layout
 
 block content
 
+  script(src="/javascripts/angularApp.js")
 
   .row
     .col-md-6.col-md-offset-3
       ui-view
+
+  script(type="text/ng-template" id="/protected.html")
+    .page-header
+      h1 PROTECTED
+      h2 {{ test.success }}
+
 
 
   script(type="text/ng-template" id="/home.html")
@@ -52,7 +59,7 @@ block content
       h3 Log In
 
       .form-group
-        input(type="text",class="form-control",placeholder="Username",ng-model="user.username")/
+        input(type="text", class="form-control",placeholder="Username",value='test_user',ng-model="user.username")/
 
       .form-group
         input(type="password",class="form-control",placeholder="Password",ng-model="user.password")/

@@ -77,7 +77,7 @@ app.factory('test', ['$http', 'auth', function($http,auth){
     };
     return o;
 }])
-app.factory('auth', ['$http', '$window',  function($http, $window){
+app.factory('auth', ['$http', '$window',  '$state', function($http, $window, $state){
     var auth = {};
 
     auth.saveToken = function (token){
@@ -117,10 +117,10 @@ app.factory('auth', ['$http', '$window',  function($http, $window){
         });
     };
     auth.logOut = function(){
-        //test.clear();
 
+        $state.go('login');
         $window.localStorage.removeItem('generic-auth-token');
-        $window.location.href = "/";
+
     };
     return auth;
 }]);
@@ -170,7 +170,7 @@ app.config([
                 }
             }]
         })
-      /*  $stateProvider.state('users', {
+        /*$stateProvider.state('warning', {
             url: '/users',
             templateUrl: '/users.html',
             controller: 'UsersCtrl',

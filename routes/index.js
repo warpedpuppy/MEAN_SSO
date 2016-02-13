@@ -11,6 +11,8 @@ router.get('/', function(req, res, next) {
   res.render('index');
 });
 
+
+
 router.get('/protected',auth,function(req, res, next) {
 
   res.json({success:"this is passed from the authenticated /protected post call"})

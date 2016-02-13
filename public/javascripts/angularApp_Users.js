@@ -72,7 +72,9 @@ app.factory('test', ['$http', 'auth', function($http,auth){
     };
 
     o.get_protected = function() {
+        alert(auth.getToken());
         return $http.post('/users/users_protected', {
+
             headers: {Authorization: 'Bearer '+auth.getToken()}
         }).success(function(data){
             angular.copy(data, o.test);

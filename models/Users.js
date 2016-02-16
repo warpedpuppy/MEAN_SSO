@@ -9,7 +9,8 @@ var UserSchema = new mongoose.Schema({
     username: {type: String, lowercase: true, unique: true},
     hash: String,
     salt: String,
-    enabled:Boolean
+    approval_link:String,
+    enabled:{type: Boolean, default:false}
 });
 
 UserSchema.methods.setPassword = function(password){

@@ -9,7 +9,22 @@ var auth = jwt({secret:process.env.SECRET_VAR, userProperty: 'payload'});
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
+ /* */
+
+      User.find({}, function(err, docs) {
+        if (!err){
+          console.log(docs);
+          //process.exit();
+        } else {throw err;}
+      })
   res.render('index');
+});
+
+router.post('/empty_db',function(req, res, next) {
+  User.remove({}, function(err){
+    if(err)console.log(err)
+  });
+
 });
 
 
@@ -30,12 +45,36 @@ router.post('/login', function(req, res, next){
     if(err){ return next(err); }
 
     if(user){
-      return res.json({token: user.generateJWT()});
+      if(user.enabled === false)
+        return res.status(400).json({message: 'not approved yet'});
+      else
+        return res.json({token: user.generateJWT()});
+
+
     } else {
       return res.status(401).json(info);
     }
   })(req, res, next);
 });
+
+router.post('/enable_account/:key', function(req, res, next) {
+    var key = req.params.key;
+    console.log(key);
+
+    var query = {"approval_link": key};
+    var update = {'enabled': true};
+    var options = {};
+
+
+    User.findOneAndUpdate(query, update,  function(err, user){
+      console.log(user);
+      return res.json({token: user.generateJWT(),info:user})
+    })
+
+
+})
+
+
 
 router.post('/register', function(req, res, next){
   if(!req.body.username || !req.body.password|| !req.body.email){
@@ -57,14 +96,16 @@ router.post('/register', function(req, res, next){
   };
 
   var transporter = nodemailer.createTransport(smtpConfig);
+  var random_string = randomString(32, '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ');
+  var text = "http://localhost:3000/#/enable_account?key="+random_string;
 
 // setup e-mail data with unicode symbols
   var mailOptions = {
-    from: 'Fred Foo 👥 <foo@blurdybloop.com>', // sender address
+    from: 'Fredasdf Foo 👥 <foo@blurdybloop.com>', // sender address
     to: 'ted@warpedpuppy.com', // list of receivers
     subject: 'Hello ✔', // Subject line
-    text: 'Hello world 🐴', // plaintext body
-    html: '<b>Hello world 🐴</b>' // html body
+    text: 'Hello world ?', // plaintext body
+    html: '<a href="'+text+'">'+text+'</a>' // html body
   };
 
 // send mail with defined transport object
@@ -81,14 +122,28 @@ router.post('/register', function(req, res, next){
   var user = new User();
 
   user.username = req.body.username;
+  user.approval_link =random_string;
 
   user.setPassword(req.body.password)
 
   user.save(function (err){
     if(err){ return next(err); }
 
-    return res.json({token: user.generateJWT()})
+    //changing this -- now must click link
+    //return res.json({token: user.generateJWT()})
+
+    return res.json({approval:"pending"});
   });
+
+
 });
+
+function randomString(length, chars) {
+  var result = '';
+  for (var i = length; i > 0; --i) result += chars[Math.floor(Math.random() * chars.length)];
+  return result;
+}
+
+
 
 module.exports = router;

@@ -20,6 +20,19 @@ app.controller('ProtectedCtrl',[
         $scope.test = test.test;
 
     }]);
+
+app.controller('EnableCtrl'['$scope', 'info',  function($scope,info){
+        alert("enable")
+        $scope.info = "hi";//info.info;
+
+    }]);
+app.controller('PendingCtrl'[
+    '$scope',
+        function($scope){
+
+
+
+        }]);
 app.controller('UsersCtrl', [
     '$scope',
     'auth',
@@ -34,13 +47,14 @@ app.controller('AuthCtrl', [
         '$state',
         'auth',
         function($scope, $state, auth){
+            alert("auth controller");
             $scope.user = {};
 
             $scope.register = function(){
                 auth.register($scope.user).error(function(error){
                     $scope.error = error;
                 }).then(function(){
-                    $state.go('home');
+                    $state.go('pending');
                 });
             };
 
@@ -58,10 +72,25 @@ app.controller('MainCtrl', ['$scope','auth',function($scope, auth){
 
     $scope.isLoggedIn = auth.isLoggedIn;
     $scope.currentUser = auth.currentUser;
+    alert("main")
 
-    $scope.user.email = "test@tugtug.com";
+   // $scope.user.email = "test@tugtug.com";
 
 }]);
+
+app.factory('info', ['$http', '$location', function($http,$location){
+    var o = {
+        info:[]
+    };
+    o.enable = function(){
+         return $http.post("/enable_account/"+$location.search().key).success(function(data){
+            alert(data.info.username);
+            angular.copy(data.info, o.info)
+
+        })
+    }
+    return o;
+}])
 
 app.factory('test', ['$http', 'auth', function($http,auth){
     var o = {
@@ -110,7 +139,11 @@ app.factory('auth', ['$http', '$window',  '$state', function($http, $window, $st
     };
     auth.register = function(user){
         return $http.post('/register', user).success(function(data){
-            auth.saveToken(data.token);
+            //don't save token becaue must wait for approval
+            //auth.saveToken(data.token);
+
+            $state.go("pending");
+            //alert("register success");
         });
     };
     auth.logIn = function(user){
@@ -153,6 +186,28 @@ app.config([
                 }
             }]
         })
+        $stateProvider.state('pending', {
+            url: '/pending',
+            templateUrl: '/pending.html',
+            controller: 'PendingCtrl',
+            onEnter: ['$state', "$http","$location", function($state,$http,$location){
+             //   alert("entered pending");
+            }]
+        })
+
+        $stateProvider.state('enable', {
+            url: '/enable_account',
+            templateUrl: '/enable_account.html',
+            controller: 'EnableCtrl',
+            onEnter: ['$state',"info", function($state, info){
+
+                info.enable().success(function(data){
+
+                   alert("enable success "+data.info.username);
+               });
+            }]
+        })
+
         $stateProvider.state('protected', {
             url: '/protected',
             templateUrl: '/protected.html',
@@ -172,25 +227,18 @@ app.config([
                 }
             }]
         })
-        /*$stateProvider.state('warning', {
-            url: '/users',
-            templateUrl: '/users.html',
-            controller: 'UsersCtrl',
-            onEnter: ['$state',  function($state){
 
-                alert("users")
-                if(auth.isLoggedIn()){
-                    $state.go('users');
-                }
-            }]
-        })*/
         $stateProvider.state('register', {
                 url: '/register',
                 templateUrl: '/register.html',
                 controller: 'AuthCtrl',
                 onEnter: ['$state', 'auth', function($state, auth){
                     if(auth.isLoggedIn()){
+
                         $state.go('home');
+                    }
+                    else{
+                        //$state.go('enable');
                     }
                 }]
             });

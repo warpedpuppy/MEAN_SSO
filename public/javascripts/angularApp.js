@@ -59,6 +59,8 @@ app.controller('MainCtrl', ['$scope','auth',function($scope, auth){
     $scope.isLoggedIn = auth.isLoggedIn;
     $scope.currentUser = auth.currentUser;
 
+    $scope.user.email = "test@tugtug.com";
+
 }]);
 
 app.factory('test', ['$http', 'auth', function($http,auth){

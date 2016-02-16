@@ -4,6 +4,7 @@ var passport = require('passport');
 var mongoose = require('mongoose');
 var User = mongoose.model('User');
 var jwt = require('express-jwt');
+var nodemailer = require('nodemailer');
 var auth = jwt({secret:process.env.SECRET_VAR, userProperty: 'payload'});
 
 /* GET home page. */
@@ -37,9 +38,45 @@ router.post('/login', function(req, res, next){
 });
 
 router.post('/register', function(req, res, next){
-  if(!req.body.username || !req.body.password){
+  if(!req.body.username || !req.body.password|| !req.body.email){
     return res.status(400).json({message: 'Please fill out all fields'});
   }
+
+  //send email
+
+  //the following only works, because I downgraded the security on the following account
+  //https://www.google.com/settings/security/lesssecureapps
+  var smtpConfig = {
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true, // use SSL
+    auth: {
+      user: 'ashland2468@gmail.com',
+      pass: 'tugtugtugtug'
+    }
+  };
+
+  var transporter = nodemailer.createTransport(smtpConfig);
+
+// setup e-mail data with unicode symbols
+  var mailOptions = {
+    from: 'Fred Foo 👥 <foo@blurdybloop.com>', // sender address
+    to: 'ted@warpedpuppy.com', // list of receivers
+    subject: 'Hello ✔', // Subject line
+    text: 'Hello world 🐴', // plaintext body
+    html: '<b>Hello world 🐴</b>' // html body
+  };
+
+// send mail with defined transport object
+  transporter.sendMail(mailOptions, function(error, info){
+    if(error){
+      return console.log(error);
+    }
+    console.log('Message sent: ' + info.response);
+  });
+  //end send email
+
+
 
   var user = new User();
 

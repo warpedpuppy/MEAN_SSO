@@ -63,7 +63,7 @@ router.post('/enable_account/:key', function(req, res, next) {
     var key = req.params.key;
 
 
-    var query = {"approval_link": key};
+    var query = {"approval_link": 0};//key};
     var update = {'enabled': true, 'approval_link': 0};
     var options = {};
 
@@ -71,11 +71,54 @@ router.post('/enable_account/:key', function(req, res, next) {
     User.findOneAndUpdate(query, update,  function(err, user){
 
 
+
       if(user === null){
-        return res.json({token: [],info:user,allow:false})
+        //this is the link doesn't exist
+        return res.json({token: [],info:user,allow:false, expired:false})
       }
       else{
-        return res.json({token: user.generateJWT(),info:user,allow:true})
+
+
+        // time stamp is in milliseconds
+        var time_entered = user.approval_expiration
+
+        var one_second = 1000;
+        var one_minute = 60 * one_second;
+        var one_hour = 60 * one_minute;
+        var one_day = 24 * one_hour;
+        var one_week = 7 * one_day;
+
+        var current_time = (!Date.now)?  new Date().getTime(): Date.now();
+
+        var time_elapsed = current_time - time_entered;
+
+        if(time_elapsed > one_second)
+        {
+          //delete record and tell person that it has been too long
+
+          User.remove({"_id":user._id}, function(err){
+            if(err)console.log(err)
+
+            return res.json({token: [],info:user,allow:false, expired:true})
+          });
+
+        }
+        else{
+
+          return res.json({token: user.generateJWT(),info:user,allow:true, expired:false})
+
+        }
+
+
+
+
+
+
+
+
+
+
+
       }
 
     })
@@ -132,6 +175,8 @@ router.post('/register', function(req, res, next){
 
   user.username = req.body.username;
   user.approval_link =random_string;
+
+  user.approval_expiration = (!Date.now)?  new Date().getTime(): Date.now();
 
   user.setPassword(req.body.password)
 

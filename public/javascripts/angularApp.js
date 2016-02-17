@@ -143,7 +143,12 @@ app.factory('auth', ['$http', '$window',  '$state', function($http, $window, $st
             var token = auth.getToken();
             var payload = JSON.parse($window.atob(token.split('.')[1]));
 
-            return payload.username;
+            function capitalizeFirstLetter(string) {
+                return string.charAt(0).toUpperCase() + string.slice(1);
+            }
+            var name = payload.username
+            name = name.charAt(0).toUpperCase() + name.slice(1);
+            return name;
         }
     };
 

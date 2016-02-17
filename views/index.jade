@@ -12,8 +12,11 @@ block content
   script(type="text/ng-template" id="/enable_account.html")
     .page-header
       h1 Your account has been enabled.
-      h2 Welcome, {{ info.username }}!
+      h2 Welcome, {{ info.username | uppercase}}!
 
+  script(type="text/ng-template" id="/expired.html")
+    .page-header
+      h1 EXPIRED
 
   script(type="text/ng-template" id="/protected.html")
     .page-header
@@ -36,6 +39,7 @@ block content
   script(type="text/ng-template" id="/register.html")
     .page-header
       h1 mean authentication
+      p {{ expired_notice }}
 
     div(ng-show="error" class="alert alert-danger row")
       span {{ error.message }}

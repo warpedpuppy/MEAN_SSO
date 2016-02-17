@@ -27,7 +27,7 @@ html
             li(ng-show="isLoggedIn()")
               a(href='/#/protected') Protected Zone
             li(ng-show="isLoggedIn()")
-              a(href='/#/home') {{ currentUser() }}'s page
+              a(href='/#/home') {{ currentUser() | uppercase}}'s page
             li(ng-show="isLoggedIn()")
               a(href="", ng-click="logOut()") Log Out
             li(ng-hide="isLoggedIn()")
@@ -35,5 +35,5 @@ html
             li(ng-hide="isLoggedIn()")
               a(href="/#/register") Register
             li
-              a(ng-click='emptyDBS()') empty dbs
+              a(ng-click='emptyDBS()', style='cursor:pointer;') empty dbs
     block content

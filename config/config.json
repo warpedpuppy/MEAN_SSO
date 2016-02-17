@@ -1,0 +1,22 @@
+
+{
+
+  "development": {
+    "email_host": "smtp.gmail.com",
+    "email_user": "ashland2468@gmail.com",
+    "email_password": "tugtugtugtug",
+    "email_port":465
+  },
+  "test": {
+    "email_host": "smtp.gmail.com",
+    "email_user": "ashland2468@gmail.com",
+    "email_password": "tugtugtugtug",
+    "email_port":465
+  },
+  "production": {
+    "email_host": "smtp.gmail.com",
+    "email_user": "ashland2468@gmail.com",
+    "email_password": "tugtugtugtug",
+    "email_port":465
+  }
+}

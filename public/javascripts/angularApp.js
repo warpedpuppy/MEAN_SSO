@@ -30,8 +30,8 @@ app.controller('ProtectedCtrl',[
 
     }]);
 
-app.controller('EnableCtrl',['$scope', 'info', 'auth', function($scope,info,auth){
 
+app.controller('EnableCtrl',['$scope', 'info', 'auth', function($scope,info,auth){
 
 
     $scope.info = info.info;
@@ -58,9 +58,16 @@ app.controller('AuthCtrl', [
         '$scope',
         '$state',
         'auth',
-        function($scope, $state, auth){
+        'info',
+        function($scope, $state, auth, info){
            // alert("auth controller");
             $scope.user = {};
+            $scope.info = info.info;
+
+            if($scope.info.expired == true){
+                alert("expired");
+                $scope.expired_notice ="That was expired, please re-register."
+            }
 
             $scope.register = function(){
                 auth.register($scope.user).error(function(error){
@@ -97,7 +104,12 @@ app.factory('info', ['$http', '$location','auth',"$state", function($http,$locat
     o.enable = function(){
          return $http.post("/enable_account/"+$location.search().key).success(function(data){
             //alert(data.info.username);
-            if(data.allow == false){
+             if(data.expired == true){
+
+                 angular.copy(data, o.info)
+                 $state.go("register");
+             }
+            else if(data.allow == false){
                 $state.go("home");
             }
              else{
@@ -143,12 +155,7 @@ app.factory('auth', ['$http', '$window',  '$state', function($http, $window, $st
             var token = auth.getToken();
             var payload = JSON.parse($window.atob(token.split('.')[1]));
 
-            function capitalizeFirstLetter(string) {
-                return string.charAt(0).toUpperCase() + string.slice(1);
-            }
-            var name = payload.username
-            name = name.charAt(0).toUpperCase() + name.slice(1);
-            return name;
+            return payload.username;
         }
     };
 
@@ -235,6 +242,11 @@ app.config([
                 }
             }]
         })
+        $stateProvider.state('expired', {
+            url: '/expired',
+            templateUrl: '/expired.html',
+            controller: 'MainCtrl'
+        })
 
 
 
@@ -291,4 +303,5 @@ app.config([
         $urlRouterProvider.otherwise('login');
     }]);
 
+$filter('uppercase')()
 

@@ -7,6 +7,9 @@ var jwt = require('express-jwt');
 var nodemailer = require('nodemailer');
 var auth = jwt({secret:process.env.SECRET_VAR, userProperty: 'payload'});
 
+var env       = process.env.NODE_ENV || "development";
+var config    = require(__dirname + '/../config/config.json')[env];
+
 /* GET home page. */
 router.get('/', function(req, res, next) {
  /* */
@@ -63,7 +66,7 @@ router.post('/enable_account/:key', function(req, res, next) {
     var key = req.params.key;
 
 
-    var query = {"approval_link": 0};//key};
+    var query = {"approval_link": key};
     var update = {'enabled': true, 'approval_link': 0};
     var options = {};
 
@@ -92,7 +95,7 @@ router.post('/enable_account/:key', function(req, res, next) {
 
         var time_elapsed = current_time - time_entered;
 
-        if(time_elapsed > one_second)
+        if(time_elapsed > one_hour)
         {
           //delete record and tell person that it has been too long
 
@@ -138,12 +141,12 @@ router.post('/register', function(req, res, next){
   //the following only works, because I downgraded the security on the following account
   //https://www.google.com/settings/security/lesssecureapps
   var smtpConfig = {
-    host: 'smtp.gmail.com',
-    port: 465,
+    host: config.email_host,
+    port: config.email_port,
     secure: true, // use SSL
     auth: {
-      user: 'ashland2468@gmail.com',
-      pass: 'tugtugtugtug'
+      user: config.email_user,
+      pass: config.email_password
     }
   };
 
@@ -153,7 +156,7 @@ router.post('/register', function(req, res, next){
 
 // setup e-mail data with unicode symbols
   var mailOptions = {
-    from: 'Fredasdf Foo 👥 <foo@blurdybloop.com>', // sender address
+    from: 'Ted Walther 👥 <ted@warpedpuppy.com>', // sender address
     to: 'ted@warpedpuppy.com', // list of receivers
     subject: 'Hello ✔', // Subject line
     text: 'Hello world ?', // plaintext body

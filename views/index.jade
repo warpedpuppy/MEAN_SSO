@@ -44,19 +44,33 @@ block content
     div(ng-show="error" class="alert alert-danger row")
       span {{ error.message }}
 
-    form(ng-submit="register()",style="margin-top:30px;")
+    form(ng-submit="register()",style="margin-top:30px;", name="register_form")
       h3 Register
 
+      .form-group(class="reg_form_input")
+        input(type="text",class="form-control",placeholder="Username", ng-model="user.username" required)/
       .form-group
-        input(type="text",class="form-control",placeholder="Username",ng-model="user.username")/
+        p(class='mini-form') only digits and letters, please
+
+      div(class='form-group reg_form_input')
+        input(class='email_reg_form', type="email",class="form-control",placeholder="Email address",name="input",ng-model="user.email" required)/
 
       .form-group
-        input(type="text",class="form-control",placeholder="Email address",ng-model="user.email")/
+        p(ng-class="{hide: register_form.input.$valid}", class='mini-form') dat not good email
+        p(ng-class="{hide: !register_form.input.$valid}", class='mini-form') dat better email
+
+      .form-group(class=' form-group reg_form_input')
+        input(type="password",class="form-control",placeholder="Password",ng-model="user.password" required)/
 
       .form-group
-        input(type="password",class="form-control",placeholder="Password",ng-model="user.password")/
+        p(class='mini-form') passwords must be >= 6 chars
+        p(class='mini-form') passwords must have at least one uppercase
+        p(class='mini-form') passwords must have at least one lowercase
+        p(class='mini-form') passwords must have at least one number
 
       button(type="submit" class="btn btn-primary") Register
+
+
 
 
 

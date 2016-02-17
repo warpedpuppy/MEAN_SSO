@@ -20,9 +20,11 @@ router.get('/', function(req, res, next) {
   res.render('index');
 });
 
-router.post('/empty_db',function(req, res, next) {
+router.post('/empty_dbs',function(req, res, next) {
   User.remove({}, function(err){
     if(err)console.log(err)
+
+    res.json({sucess:"sucess"});
   });
 
 });
@@ -59,16 +61,23 @@ router.post('/login', function(req, res, next){
 
 router.post('/enable_account/:key', function(req, res, next) {
     var key = req.params.key;
-    console.log(key);
+
 
     var query = {"approval_link": key};
-    var update = {'enabled': true};
+    var update = {'enabled': true, 'approval_link': 0};
     var options = {};
 
 
     User.findOneAndUpdate(query, update,  function(err, user){
-      console.log(user);
-      return res.json({token: user.generateJWT(),info:user})
+
+
+      if(user === null){
+        return res.json({token: [],info:user,allow:false})
+      }
+      else{
+        return res.json({token: user.generateJWT(),info:user,allow:true})
+      }
+
     })
 
 
@@ -119,6 +128,46 @@ router.post('/register', function(req, res, next){
 
 
 
+  var user = new User();
+
+  user.username = req.body.username;
+  user.approval_link =random_string;
+
+  user.setPassword(req.body.password)
+
+  user.save(function (err){
+    if(err){ return next(err); }
+
+    //changing this -- now must click link
+    //return res.json({token: user.generateJWT()})
+
+    return res.json({approval:"pending"});
+  });
+
+
+});
+
+
+
+router.post('/enabled_get_token', function(req, res, next){
+
+  var user_id = req.body.user_id;
+  var query = {"_id": user_id};
+
+
+  User.find(query,  function(err, user){
+    console.log(user);
+    return res.json({token: user.generateJWT(),info:user})
+  })
+
+
+
+
+  if(!req.body.username || !req.body.password|| !req.body.email){
+    return res.status(400).json({message: 'Please fill out all fields'});
+  }
+
+  //this a call to the db
   var user = new User();
 
   user.username = req.body.username;

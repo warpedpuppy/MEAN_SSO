@@ -8,22 +8,30 @@ var app = angular.module('authentication_app', ['ui.router']);
 app.controller('NavCtrl', [
     '$scope',
     'auth',
-    function($scope, auth){
+    '$http',
+    function($scope, auth, $http){
 
         $scope.isLoggedIn = auth.isLoggedIn;
         $scope.currentUser = auth.currentUser;
         $scope.logOut = auth.logOut;
+
+        $scope.emptyDBS = function(){
+            $http.post("/empty_dbs").success(function(data){
+                alert("dbs emptied");
+            })
+
+        }
     }]);
 app.controller('ProtectedCtrl',[
     '$scope',
-        'test',
-    function($scope,test){
-
-        $scope.test = test.test;
+        'auth',
+    function($scope,auth){
+        $scope.message_from_server = auth.message_from_server;
 
     }]);
 
-app.controller('EnableCtrl',['$scope', 'info',  function($scope,info){
+app.controller('EnableCtrl',['$scope', 'info', 'auth', function($scope,info,auth){
+
 
 
     $scope.info = info.info;
@@ -31,11 +39,10 @@ app.controller('EnableCtrl',['$scope', 'info',  function($scope,info){
 }]);
 
 
-app.controller('PendingCtrl'[
+app.controller('PendingCtrl',[
     '$scope',
         function($scope){
 
-            alert("2")
 
         }]);
 app.controller('UsersCtrl', [
@@ -52,7 +59,7 @@ app.controller('AuthCtrl', [
         '$state',
         'auth',
         function($scope, $state, auth){
-            alert("auth controller");
+           // alert("auth controller");
             $scope.user = {};
 
             $scope.register = function(){
@@ -77,54 +84,51 @@ app.controller('MainCtrl', ['$scope','auth',function($scope, auth){
 
     $scope.isLoggedIn = auth.isLoggedIn;
     $scope.currentUser = auth.currentUser;
-    alert("main")
+  //  alert("main")
 
    // $scope.user.email = "test@tugtug.com";
 
 }]);
 
-app.factory('info', ['$http', '$location', function($http,$location){
+app.factory('info', ['$http', '$location','auth',"$state", function($http,$location,auth,$state){
     var o = {
         info:[]
     };
     o.enable = function(){
          return $http.post("/enable_account/"+$location.search().key).success(function(data){
             //alert(data.info.username);
-            angular.copy(data.info, o.info)
+            if(data.allow == false){
+                $state.go("home");
+            }
+             else{
+                auth.saveToken(data.token);
+                angular.copy(data.info, o.info)
+            }
+
 
         })
     }
     return o;
 }])
 
-app.factory('test', ['$http', 'auth', function($http,auth){
-    var o = {
-        test:[]
-    };
-    o.clear = function() {
-        o.test = [];
-    };
-    o.get_protected = function() {
-        return $http.get('/protected', {
-            headers: {Authorization: 'Bearer '+auth.getToken()}
-        }).success(function(data){
-            angular.copy(data, o.test);
-        });
-    };
-    return o;
-}])
 app.factory('auth', ['$http', '$window',  '$state', function($http, $window, $state){
+
+
+
     var auth = {};
+    auth.message_from_server = {};
 
     auth.saveToken = function (token){
-        $window.localStorage['generic-auth-token'] = token;
+        $window.localStorage['generic-auth-token-new'] = token;
     };
 
     auth.getToken = function (){
-        return $window.localStorage['generic-auth-token'];
+        //$window.localStorage['generic-auth-token'] = undefined;
+        return $window.localStorage['generic-auth-token-new'];
     }
     auth.isLoggedIn = function(){
         var token = auth.getToken();
+
 
         if(token){
             var payload = JSON.parse($window.atob(token.split('.')[1]));
@@ -142,6 +146,7 @@ app.factory('auth', ['$http', '$window',  '$state', function($http, $window, $st
             return payload.username;
         }
     };
+
     auth.register = function(user){
         return $http.post('/register', user).success(function(data){
             //don't save token becaue must wait for approval
@@ -159,8 +164,18 @@ app.factory('auth', ['$http', '$window',  '$state', function($http, $window, $st
     auth.logOut = function(){
 
         $state.go('login');
-        $window.localStorage.removeItem('generic-auth-token');
+        $window.localStorage.removeItem('generic-auth-token-new');
 
+    };
+    auth.server_auth_check = function() {
+        return $http.get('/protected', {
+            headers: {Authorization: 'Bearer '+auth.getToken()}
+        }).success(function(data){
+            //alert(data.success)
+
+            angular.copy(data, auth.message_from_server);
+            //alert( auth.message_from_server.success)
+        });
     };
     return auth;
 }]);
@@ -175,7 +190,16 @@ app.config([
             .state('home', {
                 url: '/home',
                 templateUrl: '/home.html',
-                controller: 'MainCtrl'
+                controller: 'MainCtrl',
+                onEnter: ['$state', 'auth', function($state, auth){
+                    if(auth.isLoggedIn()){
+
+
+                    }
+                    else{
+                        $state.go('login');
+                    }
+                }]
             });
         $stateProvider.state('login', {
             url: '/login',
@@ -184,7 +208,7 @@ app.config([
             onEnter: ['$state', 'auth', function($state, auth){
                 if(auth.isLoggedIn()){
 
-                    $state.go('protected');
+                    $state.go('home');
                 }
                 else{
 
@@ -195,8 +219,15 @@ app.config([
             url: '/pending',
             templateUrl: '/pending.html',
             controller: 'PendingCtrl',
-            onEnter: ['$state', "$http","$location", function($state,$http,$location){
-             //   alert("entered pending");
+            onEnter: ['$state', "$http","$location", "auth",function($state,$http,$location,auth){
+
+                if(auth.isLoggedIn()){
+
+                    $state.go('home');
+                }
+                else{
+
+                }
             }]
         })
 
@@ -206,13 +237,13 @@ app.config([
             url: '/protected',
             templateUrl: '/protected.html',
             controller: 'ProtectedCtrl',
-            onEnter: ['$state',  'auth', 'test',function($state,auth,test){
+            onEnter: ['$state',  'auth', function($state,auth){
 
-
-
-                if(auth.isLoggedIn()){
-                    test.get_protected().success(function(data){
-                        //console.log('YES'+data.success)
+                //here we have a 2x check -- first checks locally and then goes and hits a link on the server
+                //that is protected by auth. this may be overkill
+                 if(auth.isLoggedIn()){
+                    auth.server_auth_check().success(function(data){
+                        //console.log('YES = '+data.success)
                     })
 
                 }
@@ -246,13 +277,13 @@ app.config([
 
                 info.enable().success(function(data){
 
-                    alert("enable success "+data.info.username);
+                   // alert("enable success "+data.info.username);
                 });
             }]
         })
 
 
-        $urlRouterProvider.otherwise('enable_account');
+        $urlRouterProvider.otherwise('login');
     }]);
 
 

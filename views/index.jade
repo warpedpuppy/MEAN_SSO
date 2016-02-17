@@ -11,14 +11,14 @@ block content
 
   script(type="text/ng-template" id="/enable_account.html")
     .page-header
-      h1 your account has been enabled
-      h2 {{ info.username }}
+      h1 Your account has been enabled.
+      h2 Welcome, {{ info.username }}!
 
 
   script(type="text/ng-template" id="/protected.html")
     .page-header
       h1 PROTECTED
-      h2 {{ test.success }}
+      h2 message: {{ message_from_server.success }}
 
   script(type="text/ng-template" id="/pending.html")
     .page-header

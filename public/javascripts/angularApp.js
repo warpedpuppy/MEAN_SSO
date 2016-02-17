@@ -4,10 +4,12 @@
 
 var app = angular.module('authentication_app', ['ui.router']);
 
+
 app.controller('NavCtrl', [
     '$scope',
     'auth',
     function($scope, auth){
+
         $scope.isLoggedIn = auth.isLoggedIn;
         $scope.currentUser = auth.currentUser;
         $scope.logOut = auth.logOut;
@@ -21,16 +23,19 @@ app.controller('ProtectedCtrl',[
 
     }]);
 
-app.controller('EnableCtrl'['$scope', 'info',  function($scope,info){
-        alert("enable")
-        $scope.info = "hi";//info.info;
+app.controller('EnableCtrl',['$scope', 'info',  function($scope,info){
 
-    }]);
+
+    $scope.info = info.info;
+
+}]);
+
+
 app.controller('PendingCtrl'[
     '$scope',
         function($scope){
 
-
+            alert("2")
 
         }]);
 app.controller('UsersCtrl', [
@@ -84,7 +89,7 @@ app.factory('info', ['$http', '$location', function($http,$location){
     };
     o.enable = function(){
          return $http.post("/enable_account/"+$location.search().key).success(function(data){
-            alert(data.info.username);
+            //alert(data.info.username);
             angular.copy(data.info, o.info)
 
         })
@@ -195,18 +200,7 @@ app.config([
             }]
         })
 
-        $stateProvider.state('enable', {
-            url: '/enable_account',
-            templateUrl: '/enable_account.html',
-            controller: 'EnableCtrl',
-            onEnter: ['$state',"info", function($state, info){
 
-                info.enable().success(function(data){
-
-                   alert("enable success "+data.info.username);
-               });
-            }]
-        })
 
         $stateProvider.state('protected', {
             url: '/protected',
@@ -243,5 +237,22 @@ app.config([
                 }]
             });
 
-        $urlRouterProvider.otherwise('login');
+
+        $stateProvider.state('enable_account', {
+            url: '/enable_account',
+            templateUrl: '/enable_account.html',
+            controller: 'EnableCtrl',
+            onEnter: ['$state',"info",function($state, info){
+
+                info.enable().success(function(data){
+
+                    alert("enable success "+data.info.username);
+                });
+            }]
+        })
+
+
+        $urlRouterProvider.otherwise('enable_account');
     }]);
+
+

@@ -8,6 +8,13 @@ block content
     .col-md-6.col-md-offset-3
       ui-view
 
+
+  script(type="text/ng-template" id="/enable_account.html")
+    .page-header
+      h1 your account has been enabled
+      h2 {{ info.username }}
+
+
   script(type="text/ng-template" id="/protected.html")
     .page-header
       h1 PROTECTED
@@ -17,10 +24,7 @@ block content
     .page-header
       h1 please go to your mail and click the link
 
-  script(type="text/ng-template" id="/enable_account.html")
-    .page-header
-      h1 your account has been enabled
-      h2 {{ info }}
+
 
 
   script(type="text/ng-template" id="/home.html")

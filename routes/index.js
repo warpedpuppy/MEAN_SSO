@@ -147,9 +147,16 @@ router.post('/enable_account/:key', function(req, res, next) {
 
 
 router.post('/register', function(req, res, next){
+  console.log(req.body.username)
+
   if(!req.body.username || !req.body.password|| !req.body.email){
     return res.status(400).json({message: 'Please fill out all fields'});
   }
+
+  // 2x check validation -- did this locally, but let's do it remotely as well.
+
+
+
 
   //send email
 

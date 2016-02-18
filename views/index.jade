@@ -44,11 +44,14 @@ block content
     div(ng-show="error" class="alert alert-danger row")
       span {{ error.message }}
 
+    div(ng-show="error" class="alert alert-danger row")
+      span {{ error }}
+
     form(ng-submit="register()",style="margin-top:30px;", name="register_form")
       h3 Register
 
       .form-group(class="reg_form_input")
-        input(type="text",class="form-control",placeholder="Username", name='username',ng-model="user.username" username required)/
+        input(type="text",class="form-control",placeholder="Username", name='username',ng-minlength="6",ng-model="user.username" username required)/
 
         //div {{ user.username }}
       .form-group
@@ -58,11 +61,11 @@ block content
 
 
       div(class='form-group reg_form_input')
-        input(class='email_reg_form', type="email",class="form-control",placeholder="Email address",name="input",ng-model="user.email" required)/
+        input(class='email_reg_form', type="email",class="form-control",placeholder="Email address",name="email",ng-model="user.email" required)/
 
       .form-group
-        p(ng-class="{hide: register_form.input.$valid}", class='mini-form') dat not good email
-        p(ng-class="{hide: !register_form.input.$valid}", class='mini-form') dat better email
+        p(ng-class="{hide: register_form.email.$valid}", class='mini-form') dat not good email
+        span(ng-class="{hide: !register_form.email.$valid}") dat better email
 
       .form-group(class=' form-group reg_form_input')
         input(type="password",class="form-control",name="password",placeholder="Password",ng-minlength="6",ng-model="user.password" password required)/

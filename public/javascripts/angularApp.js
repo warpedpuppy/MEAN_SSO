@@ -78,11 +78,24 @@ app.controller('AuthCtrl', [
             }
 
             $scope.register = function(){
-                auth.register($scope.user).error(function(error){
-                    $scope.error = error;
-                }).then(function(){
-                    $state.go('pending');
-                });
+
+                var proceed = true;
+                for(var key in $scope.user){
+                    if($scope.user[key] === undefined){
+                        proceed = false;
+                        $scope.error = "something wrong"
+                        break;
+                    }
+                }
+
+                if(proceed === true){
+                    auth.register($scope.user).error(function(error){
+                        $scope.error = error;
+                    }).then(function(){
+                        $state.go('pending');
+                    });
+                }
+
             };
 
             $scope.logIn = function(){
@@ -94,7 +107,7 @@ app.controller('AuthCtrl', [
             };
         }])
 var LETTERS_NUMBERS_REGEXP = /^[a-zA-Z0-9]*$/;
-app.directive('username',function($q, $timeout, $http) {
+app.directive('username',['$http','info',function($http, info) {
     return {
         require: 'ngModel',
         link: function(scope, elm, attrs, ctrl) {
@@ -106,10 +119,14 @@ app.directive('username',function($q, $timeout, $http) {
 
 
 
+
             ctrl.$asyncValidators.username = function(modelValue, viewValue) {
                 var cont = {};
                 cont.username = modelValue;
-                return $http.post("/check_username/",cont).then(function(data){scope.username_not_taken = !data.data.user; console.log(data.data.user)})
+                return $http.post("/check_username/",cont).then(function(data){
+                    scope.username_not_taken = !data.data.user;
+
+                })
             }
 
 
@@ -120,15 +137,17 @@ app.directive('username',function($q, $timeout, $http) {
 
                 ctrl.$validators.username = function(modelValue, viewValue) {
 
-
+                   // info.set_username(scope.user.username);
 
                 if (!ctrl.$isEmpty(modelValue)) {
                     if (!LETTERS_NUMBERS_REGEXP.test(modelValue)) {
                         // it is valid
                         scope.username_digits_letters = true;
+                        return false;
                     }
                     else{
                         scope.username_digits_letters = false;
+
                     }
 
 
@@ -139,17 +158,21 @@ app.directive('username',function($q, $timeout, $http) {
                     }
                     else {
                         scope.hide_six = true;
+                        return false;
                     }
 
                     if(scope.hide_six === false && scope.username_digits_letters === false && scope.username_not_taken === true){
 
                         scope.username_looks_good = true;
-                            return false;
+
+                           // return false;
                     }
                     else{
                         scope.username_looks_good = false
-                            return true;
+                           // return true;
                     }
+                    return true;
+
                 }
                 else{
                     scope.hide_six = true;
@@ -159,7 +182,7 @@ app.directive('username',function($q, $timeout, $http) {
             }
         }
     };
-});
+}]);
 var UPPERCASE_REGEXP = /(?=.*[A-Z])/;
 var LOWERCASE_REGEXP = /(?=.*[a-z])/;
 var NUMBERS_REGEXP = /\d/;
@@ -248,6 +271,18 @@ app.factory('info', ['$http', '$location','auth',"$state", function($http,$locat
     var o = {
         info:[]
     };
+    o.set_username = function(string){
+        console.log("inside info = "+string)
+        if(!o.info)o.info = {};
+        o.info.username = string;
+
+
+    }
+    o.get_username = function(){
+        return o.info.username;
+
+
+    }
     o.enable = function(){
          return $http.post("/enable_account/"+$location.search().key).success(function(data){
             //alert(data.info.username);
@@ -308,7 +343,7 @@ app.factory('auth', ['$http', '$window',  '$state', function($http, $window, $st
 
     auth.register = function(user){
         return $http.post('/register', user).success(function(data){
-            //don't save token becaue must wait for approval
+            //don't save token because must wait for approval
             //auth.saveToken(data.token);
 
             $state.go("pending");

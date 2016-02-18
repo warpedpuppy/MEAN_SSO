@@ -40,6 +40,21 @@ router.get('/protected',auth,function(req, res, next) {
 
 });
 
+router.post('/check_username', function(req, res, next) {
+
+  var check_username = req.body.username;
+
+  User.findOne({'username':check_username}, function(err, user){
+    if (err) return handleError(err);
+
+    if(user === null)
+      res.json({user:false})
+    else
+      res.json({user:true})
+  })
+
+
+});
 
 router.post('/login', function(req, res, next){
   if(!req.body.username || !req.body.password){
@@ -157,7 +172,7 @@ router.post('/register', function(req, res, next){
 // setup e-mail data with unicode symbols
   var mailOptions = {
     from: 'Ted Walther 👥 <ted@warpedpuppy.com>', // sender address
-    to: 'ted@warpedpuppy.com', // list of receivers
+    to: config.admin_email, // list of receivers
     subject: 'Hello ✔', // Subject line
     text: 'Hello world ?', // plaintext body
     html: '<a href="'+text+'">'+text+'</a>' // html body

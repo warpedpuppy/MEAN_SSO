@@ -5,6 +5,7 @@
     "email_host": "smtp.gmail.com",
     "email_user": "ashland2468@gmail.com",
     "email_password": "tugtugtugtug",
+    "config_email":"ted@warpedpuppy.com",
     "email_port":465
   },
   "test": {

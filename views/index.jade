@@ -48,9 +48,14 @@ block content
       h3 Register
 
       .form-group(class="reg_form_input")
-        input(type="text",class="form-control",placeholder="Username", ng-model="user.username" required)/
+        input(type="text",class="form-control",placeholder="Username", name='username',ng-model="user.username" username required)/
+
+        //div {{ user.username }}
       .form-group
-        p(class='mini-form') only digits and letters, please
+        p(class='mini-form',ng-show="hide_six") ✔ >= 6 chars
+        p(class='mini-form',ng-show="username_digits_letters") ✔ only digits and letters, please
+        span(ng-show="username_looks_good") username looks good!
+
 
       div(class='form-group reg_form_input')
         input(class='email_reg_form', type="email",class="form-control",placeholder="Email address",name="input",ng-model="user.email" required)/
@@ -60,13 +65,14 @@ block content
         p(ng-class="{hide: !register_form.input.$valid}", class='mini-form') dat better email
 
       .form-group(class=' form-group reg_form_input')
-        input(type="password",class="form-control",placeholder="Password",ng-model="user.password" required)/
+        input(type="password",class="form-control",name="password",placeholder="Password",ng-minlength="6",ng-model="user.password" password required)/
 
       .form-group
-        p(class='mini-form') passwords must be >= 6 chars
-        p(class='mini-form') passwords must have at least one uppercase
-        p(class='mini-form') passwords must have at least one lowercase
-        p(class='mini-form') passwords must have at least one number
+        p(class='mini-form', ng-show='pd_gt_six') passwords must be >= 6 chars
+        p(class='mini-form', ng-show='pd_uppercase') passwords must have at least one uppercase
+        p(class='mini-form', ng-show='pd_lowercase') passwords must have at least one lowercase
+        p(class='mini-form', ng-show='pd_number') passwords must have at least one number
+        span(ng-show="register_form.password.$error.password") password looks good!
 
       button(type="submit" class="btn btn-primary") Register
 

@@ -9,7 +9,11 @@ app.controller('NavCtrl', [
     '$scope',
     'auth',
     '$http',
-    function($scope, auth, $http){
+    '$filter',
+    function($scope, auth, $http, $filter){
+
+
+        $filter('uppercase')()
 
         $scope.isLoggedIn = auth.isLoggedIn;
         $scope.currentUser = auth.currentUser;
@@ -64,6 +68,10 @@ app.controller('AuthCtrl', [
             $scope.user = {};
             $scope.info = info.info;
 
+            $scope.show_password_length = true;
+
+
+
             if($scope.info.expired == true){
                 alert("expired");
                 $scope.expired_notice ="That was expired, please re-register."
@@ -85,7 +93,146 @@ app.controller('AuthCtrl', [
                 });
             };
         }])
+var LETTERS_NUMBERS_REGEXP = /^[a-zA-Z0-9]*$/;
+app.directive('username',function($q, $timeout, $http) {
+    return {
+        require: 'ngModel',
+        link: function(scope, elm, attrs, ctrl) {
 
+            scope.hide_six = true;
+            scope.username_digits_letters = true;
+            scope.username_not_taken = true;
+            scope.username_looks_good = false;
+
+
+
+            ctrl.$asyncValidators.username = function(modelValue, viewValue) {
+                var cont = {};
+                cont.username = modelValue;
+                return $http.post("/check_username/",cont).then(function(data){scope.username_not_taken = !data.data.user; console.log(data.data.user)})
+            }
+
+
+
+
+
+
+
+                ctrl.$validators.username = function(modelValue, viewValue) {
+
+
+
+                if (!ctrl.$isEmpty(modelValue)) {
+                    if (!LETTERS_NUMBERS_REGEXP.test(modelValue)) {
+                        // it is valid
+                        scope.username_digits_letters = true;
+                    }
+                    else{
+                        scope.username_digits_letters = false;
+                    }
+
+
+
+                    if (viewValue.length > 6) {
+                        //alert("greater than 6")
+                        scope.hide_six = false;
+                    }
+                    else {
+                        scope.hide_six = true;
+                    }
+
+                    if(scope.hide_six === false && scope.username_digits_letters === false && scope.username_not_taken === true){
+
+                        scope.username_looks_good = true;
+                            return false;
+                    }
+                    else{
+                        scope.username_looks_good = false
+                            return true;
+                    }
+                }
+                else{
+                    scope.hide_six = true;
+                    scope.username_digits_letters = true;
+                };
+
+            }
+        }
+    };
+});
+var UPPERCASE_REGEXP = /(?=.*[A-Z])/;
+var LOWERCASE_REGEXP = /(?=.*[a-z])/;
+var NUMBERS_REGEXP = /\d/;
+app.directive('password', function($q, $timeout) {
+    return {
+        require: 'ngModel',
+        link: function(scope, elm, attrs, ctrl) {
+
+            scope.pd_gt_six = true;
+            scope.pd_uppercase = true;
+            scope.pd_lowercase = true;
+            scope.pd_number = true;
+
+            ctrl.$validators.password = function(modelValue, viewValue) {
+
+                if (!ctrl.$isEmpty(modelValue)) {
+                    if (!UPPERCASE_REGEXP.test(modelValue)) {
+                        // it is valid
+                        scope.pd_uppercase = true;
+                    }
+                    else{
+                        scope.pd_uppercase = false;
+                    }
+                    if (!LOWERCASE_REGEXP.test(modelValue)) {
+                        // it is valid
+                        scope.pd_lowercase = true;
+                    }
+                    else{
+                        scope.pd_lowercase = false;
+                    }
+
+                    if (!NUMBERS_REGEXP.test(modelValue)) {
+                        // it is valid
+                        scope.pd_number = true;
+                    }
+                    else{
+                        scope.pd_number = false;
+                    }
+
+
+
+
+                    if (viewValue.length > 6) {
+                        //alert("greater than 6")
+                        scope.pd_gt_six = false;
+                    }
+                    else {
+                        scope.pd_gt_six = true;
+                    }
+
+
+
+                    if(scope.pd_gt_six == false &&
+                    scope.pd_uppercase == false &&
+                    scope.pd_lowercase == false &&
+                    scope.pd_number == false){
+                        return false;
+                    }
+                    else{
+                        return true;
+                    }
+                }
+                else{
+                    scope.pd_gt_six = true;
+                    scope.pd_uppercase = true;
+                    scope.pd_lowercase = true;
+                    scope.pd_number = true;
+                };
+
+            }
+        }
+    };
+});
 app.controller('MainCtrl', ['$scope','auth',function($scope, auth){
 
 
@@ -302,6 +449,4 @@ app.config([
 
         $urlRouterProvider.otherwise('login');
     }]);
-
-$filter('uppercase')()
 

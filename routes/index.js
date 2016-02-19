@@ -40,17 +40,20 @@ router.get('/protected',auth,function(req, res, next) {
 
 });
 
-router.post('/check_username', function(req, res, next) {
+router.get('/check_username/:u', function(req, res, next) {
 
-  var check_username = req.body.username;
+  var check_username = req.params.u;
 
-  User.findOne({'username':check_username}, function(err, user){
-    if (err) return handleError(err);
+  User.findOne({'username':check_username}, function(err,user){
 
-    if(user === null)
-      res.json({user:false})
+
+    if(user)
+      username_taken = true;
     else
-      res.json({user:true})
+      username_taken = false;
+
+    res.json({username_taken:username_taken})
+
   })
 
 

@@ -108,128 +108,19 @@ app.controller('AuthCtrl', [
             };
         }])
 var LETTERS_NUMBERS_REGEXP = /^[a-zA-Z0-9]*$/;
-app.directive('username',['$http','info','$q',function($http, info,$q) {
+app.directive('username',['$http','info',"$q",function($http, info, $q) {
     return {
         require: 'ngModel',
         link: function(scope, elm, attrs, ctrl) {
-
-            scope.hide_six = true;
-            scope.username_digits_letters = true;
-            scope.username_not_taken = true;
-
-
-
-
-            ctrl.$asyncValidators.username = function(modelValue, viewValue) {
-
-
-                if (!ctrl.$isEmpty(modelValue)) {
-
-                var cont = {};
-                cont.username = modelValue;
-
-
-                return $http.post("/check_username/",cont).then(function(data){
-                    scope.username_not_taken = !data.data.user;
-
-
-                    if (LETTERS_NUMBERS_REGEXP.test(modelValue))
-                        scope.username_digits_letters = false;
-                    else
-                        scope.username_digits_letters = true;
-
-                    if (viewValue.length >= 3 && viewValue <=20)
-                        scope.hide_six = false;
-                    else
-                        scope.hide_six = true;
-
-                    if(scope.hide_six === false && scope.username_digits_letters === false && scope.username_not_taken === true){
-
-
-
-                            return false;
-                    }
-                    else{
-
-                            return true;
-                    }
-
-                })
-                }
-                else{
-                    //if there's nothing in the input field
-                    scope.hide_six = true;
-                    scope.username_digits_letters = true;
-                    scope.username_not_taken = true;
-                };
-
+            ctrl.$asyncValidators.usernameExists = function(username) {
+                return $http.get("/check_username/"+username).then(function(response) {
+                    return response.data.username_taken == true ? $q.reject(response.data.errorMessage) : true;
+                });
             }
         }
     };
 }]);
-var UPPERCASE_REGEXP = /(?=.*[A-Z])/;
-var LOWERCASE_REGEXP = /(?=.*[a-z])/;
-var NUMBERS_REGEXP = /\d/;
-app.directive('password', function($q, $timeout) {
-    return {
-        require: 'ngModel',
-        link: function(scope, elm, attrs, ctrl) {
 
-            scope.pd_gt_six = true;
-            scope.pd_uppercase = true;
-            scope.pd_lowercase = true;
-            scope.pd_number = true;
-
-            ctrl.$validators.password = function(modelValue, viewValue) {
-
-                if (!ctrl.$isEmpty(modelValue)) {
-
-                    if (!UPPERCASE_REGEXP.test(modelValue))
-                        scope.pd_uppercase = true;
-                    else
-                        scope.pd_uppercase = false;
-
-                    if (!LOWERCASE_REGEXP.test(modelValue))
-                        scope.pd_lowercase = true;
-                    else
-                        scope.pd_lowercase = false;
-
-                    if (!NUMBERS_REGEXP.test(modelValue))
-                        scope.pd_number = true;
-                    else
-                        scope.pd_number = false;
-
-                    if (viewValue.length >= 6 && viewValue.length <=20)
-                        scope.pd_gt_six = false;
-                    else
-                        scope.pd_gt_six = true;
-
-
-
-
-                    if(scope.pd_gt_six == false &&
-                    scope.pd_uppercase == false &&
-                    scope.pd_lowercase == false &&
-                    scope.pd_number == false){
-                        //console.log("here")
-                        return true;
-                    }
-                    else{
-                        return false;
-                    }
-                }
-                else{
-                    scope.pd_gt_six = true;
-                    scope.pd_uppercase = true;
-                    scope.pd_lowercase = true;
-                    scope.pd_number = true;
-                    return false;
-                };
-
-            }
-        }
-    };
-});
 app.controller('MainCtrl', ['$scope','auth',function($scope, auth){
 
 

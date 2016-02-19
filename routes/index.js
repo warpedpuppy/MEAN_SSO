@@ -144,7 +144,7 @@ router.post('/enable_account/:key', function(req, res, next) {
 
 })
 
-
+var LETTERS_NUMBERS_REGEXP = /^[a-zA-Z0-9]*$/;
 
 router.post('/register', function(req, res, next){
   console.log(req.body.username)
@@ -154,6 +154,8 @@ router.post('/register', function(req, res, next){
   }
 
   // 2x check validation -- did this locally, but let's do it remotely as well.
+
+  //is username 1) greater than 6 letters and 2) only letters and numbers; and 3) not taken:
 
 
 
@@ -178,7 +180,7 @@ router.post('/register', function(req, res, next){
 
 // setup e-mail data with unicode symbols
   var mailOptions = {
-    from: 'Ted Walther 👥 <ted@warpedpuppy.com>', // sender address
+    from: 'MEAN authentication 👥 <ted@warpedpuppy.com>', // sender address
     to: config.admin_email, // list of receivers
     subject: 'Hello ✔', // Subject line
     text: 'Hello world ?', // plaintext body

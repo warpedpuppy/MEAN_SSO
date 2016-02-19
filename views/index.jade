@@ -50,32 +50,34 @@ block content
     form(ng-submit="register()",style="margin-top:30px;", name="register_form")
       h3 Register
 
-      .form-group(class="reg_form_input")
-        input(type="text",class="form-control",placeholder="Username", name='username',ng-minlength="6",ng-model="user.username" username required)/
 
-        //div {{ user.username }}
+
+      .form-group(class="reg_form_input")
+        input(ng-pattern="/^[a-zA-Z0-9]*$/",ng-minlength="3",ng-maxlength='20',type="text",class="form-control",placeholder="Username", name='username',ng-model="user.username" username required)/
+
+        //div {{ user.username }},ng-minlength="6"
       .form-group
-        p(class='mini-form',ng-show="hide_six") ✔ >= 6 chars
+        p(class='mini-form') input valid? = <code>{{register_form.username.$valid}}</code><br>
+        p(class='mini-form',ng-show="hide_six") ✔ >= 3 chars & <=20
         p(class='mini-form',ng-show="username_digits_letters") ✔ only digits and letters, please
-        span(ng-show="username_looks_good") username looks good!
+
 
 
       div(class='form-group reg_form_input')
         input(class='email_reg_form', type="email",class="form-control",placeholder="Email address",name="email",ng-model="user.email" required)/
 
       .form-group
-        p(ng-class="{hide: register_form.email.$valid}", class='mini-form') dat not good email
-        span(ng-class="{hide: !register_form.email.$valid}") dat better email
+        p(class='mini-form') input valid? = <code>{{register_form.email.$valid}}</code><br>
 
-      .form-group(class=' form-group reg_form_input')
-        input(type="password",class="form-control",name="password",placeholder="Password",ng-minlength="6",ng-model="user.password" password required)/
+      .form-group(class='form-group reg_form_input')
+        input(type="password",class="form-control",name="password",placeholder="Password",ng-model="user.password",ng-pattern="/(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])/",ng-minlength="6",ng-maxlength='20' password required)/
 
       .form-group
-        p(class='mini-form', ng-show='pd_gt_six') passwords must be >= 6 chars
+        p(class='mini-form') input valid? = <code>{{register_form.password.$valid}}</code><br>
+        p(class='mini-form', ng-show='pd_gt_six') passwords must be >= 6 chars & <=20
         p(class='mini-form', ng-show='pd_uppercase') passwords must have at least one uppercase
         p(class='mini-form', ng-show='pd_lowercase') passwords must have at least one lowercase
         p(class='mini-form', ng-show='pd_number') passwords must have at least one number
-        span(ng-show="register_form.password.$error.password") password looks good!
 
       button(type="submit" class="btn btn-primary") Register
 

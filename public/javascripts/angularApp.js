@@ -79,6 +79,7 @@ app.controller('AuthCtrl', [
 
             $scope.register = function(){
 
+                console.log($scope.user)
                 var proceed = true;
                 for(var key in $scope.user){
                     if($scope.user[key] === undefined){
@@ -107,7 +108,7 @@ app.controller('AuthCtrl', [
             };
         }])
 var LETTERS_NUMBERS_REGEXP = /^[a-zA-Z0-9]*$/;
-app.directive('username',['$http','info',function($http, info) {
+app.directive('username',['$http','info','$q',function($http, info,$q) {
     return {
         require: 'ngModel',
         link: function(scope, elm, attrs, ctrl) {
@@ -115,68 +116,51 @@ app.directive('username',['$http','info',function($http, info) {
             scope.hide_six = true;
             scope.username_digits_letters = true;
             scope.username_not_taken = true;
-            scope.username_looks_good = false;
 
 
 
 
             ctrl.$asyncValidators.username = function(modelValue, viewValue) {
+
+
+                if (!ctrl.$isEmpty(modelValue)) {
+
                 var cont = {};
                 cont.username = modelValue;
+
+
                 return $http.post("/check_username/",cont).then(function(data){
                     scope.username_not_taken = !data.data.user;
 
-                })
-            }
 
-
-
-
-
-
-
-                ctrl.$validators.username = function(modelValue, viewValue) {
-
-                   // info.set_username(scope.user.username);
-
-                if (!ctrl.$isEmpty(modelValue)) {
-                    if (!LETTERS_NUMBERS_REGEXP.test(modelValue)) {
-                        // it is valid
-                        scope.username_digits_letters = true;
-                        return false;
-                    }
-                    else{
+                    if (LETTERS_NUMBERS_REGEXP.test(modelValue))
                         scope.username_digits_letters = false;
+                    else
+                        scope.username_digits_letters = true;
 
-                    }
-
-
-
-                    if (viewValue.length > 6) {
-                        //alert("greater than 6")
+                    if (viewValue.length >= 3 && viewValue <=20)
                         scope.hide_six = false;
-                    }
-                    else {
+                    else
                         scope.hide_six = true;
-                        return false;
-                    }
 
                     if(scope.hide_six === false && scope.username_digits_letters === false && scope.username_not_taken === true){
 
-                        scope.username_looks_good = true;
 
-                           // return false;
+
+                            return false;
                     }
                     else{
-                        scope.username_looks_good = false
-                           // return true;
-                    }
-                    return true;
 
+                            return true;
+                    }
+
+                })
                 }
                 else{
+                    //if there's nothing in the input field
                     scope.hide_six = true;
                     scope.username_digits_letters = true;
+                    scope.username_not_taken = true;
                 };
 
             }
@@ -199,39 +183,27 @@ app.directive('password', function($q, $timeout) {
             ctrl.$validators.password = function(modelValue, viewValue) {
 
                 if (!ctrl.$isEmpty(modelValue)) {
-                    if (!UPPERCASE_REGEXP.test(modelValue)) {
-                        // it is valid
+
+                    if (!UPPERCASE_REGEXP.test(modelValue))
                         scope.pd_uppercase = true;
-                    }
-                    else{
+                    else
                         scope.pd_uppercase = false;
-                    }
-                    if (!LOWERCASE_REGEXP.test(modelValue)) {
-                        // it is valid
+
+                    if (!LOWERCASE_REGEXP.test(modelValue))
                         scope.pd_lowercase = true;
-                    }
-                    else{
+                    else
                         scope.pd_lowercase = false;
-                    }
 
-                    if (!NUMBERS_REGEXP.test(modelValue)) {
-                        // it is valid
+                    if (!NUMBERS_REGEXP.test(modelValue))
                         scope.pd_number = true;
-                    }
-                    else{
+                    else
                         scope.pd_number = false;
-                    }
 
-
-
-
-                    if (viewValue.length > 6) {
-                        //alert("greater than 6")
+                    if (viewValue.length >= 6 && viewValue.length <=20)
                         scope.pd_gt_six = false;
-                    }
-                    else {
+                    else
                         scope.pd_gt_six = true;
-                    }
+
 
 
 
@@ -239,10 +211,11 @@ app.directive('password', function($q, $timeout) {
                     scope.pd_uppercase == false &&
                     scope.pd_lowercase == false &&
                     scope.pd_number == false){
-                        return false;
+                        //console.log("here")
+                        return true;
                     }
                     else{
-                        return true;
+                        return false;
                     }
                 }
                 else{
@@ -250,6 +223,7 @@ app.directive('password', function($q, $timeout) {
                     scope.pd_uppercase = true;
                     scope.pd_lowercase = true;
                     scope.pd_number = true;
+                    return false;
                 };
 
             }
@@ -342,6 +316,7 @@ app.factory('auth', ['$http', '$window',  '$state', function($http, $window, $st
     };
 
     auth.register = function(user){
+
         return $http.post('/register', user).success(function(data){
             //don't save token because must wait for approval
             //auth.saveToken(data.token);

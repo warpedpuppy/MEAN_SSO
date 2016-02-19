@@ -16,22 +16,38 @@ $(function() {
     var username_char_check = $("#username_char_check");
     var LETTERS_NUMBERS_REGEXP = /^[a-zA-Z0-9]*$/;
 
-    username_input.bind("change paste keyup", function() {
+    function on(id){
+        id.removeClass("orange");
+        id.addClass("green");
+
+
+        if(id.text().charAt(0) !== "✔")
+            id.prepend("✔ ")
+    }
+    function off(id){
+        id.addClass("orange");
+        id.removeClass("green");
+
+        if(id.text().charAt(0) == "✔")
+            id.text(id.text().substring(2))
+    }
+
+    username_input.bind("change paste keydown", function() {
 
         var val = $(this).val();
 
         if(val.length >= 3 && val.length <=20 ){
-            username_string_length.addClass("hide");
+            on(username_string_length)
         }
         else{
-            username_string_length.removeClass("hide");
+            off(username_string_length);
         }
 
         if(LETTERS_NUMBERS_REGEXP.test(val)){
-            username_char_check.addClass("hide");
+            on(username_char_check);
         }
         else{
-            username_char_check.removeClass("hide");
+            off(username_char_check);
         }
     });
 
@@ -49,31 +65,31 @@ $(function() {
         var val = $(this).val();
 
         if(val.length >= 6 && val.length <=20 ){
-            password_length_check.addClass("hide");
+            on(password_length_check);
         }
         else{
-            password_length_check.removeClass("hide");
+            off(password_length_check);
         }
 
         if(NUMBERS_REGEXP.test(val)){
-            password_number_check.addClass("hide");
+            on(password_number_check);
         }
         else{
-            password_number_check.removeClass("hide");
+            off(password_number_check);
         }
 
         if(LOWERCASE_REGEXP.test(val)){
-            password_lowercase_check.addClass("hide");
+            on(password_lowercase_check);
         }
         else{
-            password_lowercase_check.removeClass("hide");
+            off(password_lowercase_check);
         }
 
         if(UPPERCASE_REGEXP.test(val)){
-            password_uppercase_check.addClass("hide");
+            on(password_uppercase_check);
         }
         else{
-            password_uppercase_check.removeClass("hide");
+            off(password_uppercase_check);
         }
     });
 

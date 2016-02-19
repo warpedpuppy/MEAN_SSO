@@ -59,14 +59,14 @@ block content
       .form-group
         div(ng-if="register_form.$pending.usernameExists") checking....
         div(ng-if="register_form.$error.usernameExists") username exists already
-        p(class='mini-form') input valid? = <code>{{register_form.username.$valid}}</code><br>
-        p(class='mini-form',id='username_string_length') ✔ >= 3 chars & <=20
-        p(class='mini-form',id='username_char_check') ✔ only digits and letters, please
+        p(class='mini-form orange') input valid? = <code>{{register_form.username.$valid}}</code><br>
+        p(class='mini-form orange',id='username_string_length')  >= 3 chars & <=20
+        p(class='mini-form orange',id='username_char_check') ✔ only digits and letters, please
 
 
 
       div(class='form-group reg_form_input')
-        input(class='email_reg_form', type="email",class="form-control",placeholder="Email address",name="email",ng-model="user.email" required)/
+        input(autocomplete="off",class='email_reg_form', type="email",class="form-control",placeholder="Email address",name="email",ng-model="user.email" required)/
 
       .form-group
         p(class='mini-form') input valid? = <code>{{register_form.email.$valid}}</code><br>
@@ -75,11 +75,11 @@ block content
         input(id='password_input', type="password",class="form-control",name="password",placeholder="Password",ng-model="user.password",ng-pattern="/(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])/",ng-minlength="6",ng-maxlength='20' password required)/
 
       .form-group
-        p(class='mini-form') input valid? = <code>{{register_form.password.$valid}}</code><br>
-        p(class='mini-form',id='password_length_check') passwords must be >= 6 chars & <=20
-        p(class='mini-form',id='password_uppercase_check') passwords must have at least one uppercase
-        p(class='mini-form',id='password_lowercase_check') passwords must have at least one lowercase
-        p(class='mini-form',id='password_number_check') passwords must have at least one number
+        p(class='mini-form orange') input valid? = <code>{{register_form.password.$valid}}</code><br>
+        p(class='mini-form orange',id='password_length_check') ✔ passwords must be >= 6 chars & <=20
+        p(class='mini-form orange',id='password_uppercase_check') ✔ passwords must have at least one uppercase
+        p(class='mini-form orange',id='password_lowercase_check') ✔ passwords must have at least one lowercase
+        p(class='mini-form orange',id='password_number_check') ✔ passwords must have at least one number
 
       button(type="submit" class="btn btn-primary") Register
 

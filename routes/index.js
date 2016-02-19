@@ -42,7 +42,7 @@ router.get('/protected',auth,function(req, res, next) {
 
 router.get('/check_username/:u', function(req, res, next) {
 
-  var check_username = req.params.u;
+  var check_username = req.params.u.toLowerCase();
 
   User.findOne({'username':check_username}, function(err,user){
 
@@ -203,7 +203,7 @@ router.post('/register', function(req, res, next){
 
   var user = new User();
 
-  user.username = req.body.username;
+  user.username = req.body.username.toLowerCase();
   user.approval_link =random_string;
 
   user.approval_expiration = (!Date.now)?  new Date().getTime(): Date.now();

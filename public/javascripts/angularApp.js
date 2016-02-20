@@ -84,7 +84,7 @@ app.controller('AuthCtrl', [
                 for(var key in $scope.user){
                     if($scope.user[key] === undefined){
                         proceed = false;
-                        $scope.error = "something wrong"
+                        $scope.error.message = "one of the fields is undefined. . . hmmm."
                         break;
                     }
                 }
@@ -107,7 +107,7 @@ app.controller('AuthCtrl', [
                 });
             };
         }])
-var LETTERS_NUMBERS_REGEXP = /^[a-zA-Z0-9]*$/;
+
 app.directive('username',['$http','info',"$q",function($http, info, $q) {
     return {
         require: 'ngModel',

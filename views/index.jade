@@ -5,14 +5,15 @@ block content
   script(src="/javascripts/angularApp.js")
 
   .row
-    .col-md-6.col-md-offset-3
+    .col-md-6.col-md-offset-3.col-sm-8.col-sm-offset-2
       ui-view
 
 
   script(type="text/ng-template" id="/enable_account.html")
     .page-header
-      h1 Your account has been enabled.
-      h2 Welcome, {{ info.username | uppercase}}!
+      div(class="alert alert-success row")
+        p Congrats,your account has been enabled!
+        p Welcome, {{ info.username | uppercase}}!
 
   script(type="text/ng-template" id="/expired.html")
     .page-header
@@ -25,7 +26,7 @@ block content
 
   script(type="text/ng-template" id="/pending.html")
     .page-header
-      h1 please go to your mail and click the link
+      div(class="alert alert-info row") Please go to your mail and click the link to complete the registration process!
 
 
 
@@ -38,14 +39,10 @@ block content
 
   script(type="text/ng-template" id="/register.html")
     .page-header
-      h1 mean authentication
       p {{ expired_notice }}
 
     div(ng-show="error" class="alert alert-danger row")
       span {{ error.message }}
-
-    div(ng-show="error" class="alert alert-danger row")
-      span {{ error }}
 
     form(ng-submit="register()",style="margin-top:30px;", name="register_form")
       h3 Register
@@ -61,7 +58,7 @@ block content
         div(ng-if="register_form.$error.usernameExists") username exists already
         p(class='mini-form orange') input valid? = <code>{{register_form.username.$valid}}</code><br>
         p(class='mini-form orange',id='username_string_length')  >= 3 chars & <=20
-        p(class='mini-form orange',id='username_char_check') ✔ only digits and letters, please
+        p(class='mini-form orange',id='username_char_check') only digits and letters, please
 
 
 
@@ -69,17 +66,17 @@ block content
         input(autocomplete="off",class='email_reg_form', type="email",class="form-control",placeholder="Email address",name="email",ng-model="user.email" required)/
 
       .form-group
-        p(class='mini-form') input valid? = <code>{{register_form.email.$valid}}</code><br>
+        p(class='mini-form orange') input valid? = <code>{{register_form.email.$valid}}</code><br>
 
       .form-group(class='form-group reg_form_input')
         input(id='password_input', type="password",class="form-control",name="password",placeholder="Password",ng-model="user.password",ng-pattern="/(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])/",ng-minlength="6",ng-maxlength='20' password required)/
 
       .form-group
         p(class='mini-form orange') input valid? = <code>{{register_form.password.$valid}}</code><br>
-        p(class='mini-form orange',id='password_length_check') ✔ passwords must be >= 6 chars & <=20
-        p(class='mini-form orange',id='password_uppercase_check') ✔ passwords must have at least one uppercase
-        p(class='mini-form orange',id='password_lowercase_check') ✔ passwords must have at least one lowercase
-        p(class='mini-form orange',id='password_number_check') ✔ passwords must have at least one number
+        p(class='mini-form orange',id='password_length_check') passwords must be >= 6 chars & <=20
+        p(class='mini-form orange',id='password_uppercase_check') passwords must have at least one uppercase
+        p(class='mini-form orange',id='password_lowercase_check') passwords must have at least one lowercase
+        p(class='mini-form orange',id='password_number_check') passwords must have at least one number
 
       button(type="submit" class="btn btn-primary") Register
 
@@ -96,7 +93,6 @@ block content
 
   script(type="text/ng-template" id="/login.html")
     .page-header
-      h1 mean authentication
 
     div(ng-show="error" class="alert alert-danger row")
       span {{ error.message }}

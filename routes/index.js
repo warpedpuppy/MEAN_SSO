@@ -12,9 +12,8 @@ var config    = require(__dirname + '/../config/config.json')[env];
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
- /* */
 
-      User.find({}, function(err, docs) {
+ User.find({}, function(err, docs) {
         if (!err){
           console.log(docs);
           //process.exit();
@@ -147,7 +146,6 @@ router.post('/enable_account/:key', function(req, res, next) {
 
 })
 
-var LETTERS_NUMBERS_REGEXP = /^[a-zA-Z0-9]*$/;
 
 router.post('/register', function(req, res, next){
   console.log(req.body.username)
@@ -179,7 +177,7 @@ router.post('/register', function(req, res, next){
 
   var transporter = nodemailer.createTransport(smtpConfig);
   var random_string = randomString(32, '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ');
-  var text = "http://localhost:3000/#/enable_account?key="+random_string;
+  var text = config.site_root+"/#/enable_account?key="+random_string;
 
 // setup e-mail data with unicode symbols
   var mailOptions = {

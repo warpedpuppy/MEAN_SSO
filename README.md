@@ -1,4 +1,10 @@
 
+added:
+
+1) link sent via email to confirm registration
+2) expiration for that link
+3) angular form validation including check if username exists
+4) jquery validation checks
 
 
 //FIRST, SET THE ENVIRONMENT VARIABLE

@@ -65,6 +65,9 @@ app.controller('AuthCtrl', [
         'info',
         function($scope, $state, auth, info){
            // alert("auth controller");
+
+            empower_reg_form_jquery();
+
             $scope.user = {};
             $scope.info = info.info;
 
@@ -323,6 +326,9 @@ app.config([
                 templateUrl: '/register.html',
                 controller: 'AuthCtrl',
                 onEnter: ['$state', 'auth', function($state, auth){
+
+
+
                     if(auth.isLoggedIn()){
 
                         $state.go('home');

@@ -7,6 +7,7 @@
     "email_password": "tugtugtugtug",
     "admin_email":"ted@warpedpuppy.com",
     "site_root":"http://localhost:3000",
+    "authentication_expiration":"one_week",
     "email_port":465
   },
   "test": {

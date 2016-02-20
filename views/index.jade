@@ -2,10 +2,12 @@ extends layout
 
 block content
 
-  script(src="/javascripts/angularApp.js")
+  button(ng-click='emptyDBS()', class="btn btn-danger",style='cursor:pointer;position:fixed;bottom:2px; right:2px;') empty dbs
+
+
 
   .row
-    .col-md-6.col-md-offset-3.col-sm-8.col-sm-offset-2
+    .col-md-6.col-md-offset-3.col-sm-8.col-sm-offset-2.col-xs-8.col-xs-offset-2
       ui-view
 
 
@@ -38,14 +40,19 @@ block content
         h1(ng-hide="isLoggedIn()") you are not logged in.
 
   script(type="text/ng-template" id="/register.html")
+
+
+
     .page-header
-      p {{ expired_notice }}
+      div(ng-show="error" class="alert alert-danger row") {{ expired_notice }}
 
     div(ng-show="error" class="alert alert-danger row")
       span {{ error.message }}
 
     form(ng-submit="register()",style="margin-top:30px;", name="register_form")
+
       h3 Register
+
 
 
 
@@ -78,7 +85,8 @@ block content
         p(class='mini-form orange',id='password_lowercase_check') passwords must have at least one lowercase
         p(class='mini-form orange',id='password_number_check') passwords must have at least one number
 
-      button(type="submit" class="btn btn-primary") Register
+      button(type="submit" class="btn btn-primary",ng-disabled="register_form.$invalid") Register
+
 
 
 
@@ -97,13 +105,14 @@ block content
     div(ng-show="error" class="alert alert-danger row")
       span {{ error.message }}
 
-    form(ng-submit="logIn()",style="margin-top:30px;")
+    form(name="login_form", ng-submit="logIn()",style="margin-top:30px;")
       h3 Log In
 
       .form-group
-        input(type="text", class="form-control",placeholder="Username",value='test_user',ng-model="user.username")/
+        input(type="text", class="form-control",placeholder="Username",value='test_user',ng-model="user.username",ng-pattern="/^[a-zA-Z0-9]*$/",ng-minlength="3",ng-maxlength='20', required)/
 
       .form-group
-        input(type="password",class="form-control",placeholder="Password",ng-model="user.password")/
+        input(type="password",class="form-control",placeholder="Password",ng-model="user.password",ng-pattern="/(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])/",ng-minlength="6",ng-maxlength='20' required)/
 
-      button(type="submit" class="btn btn-primary") Log In
+      button(type="submit" class="btn btn-primary",ng-disabled="login_form.$invalid") Log In
+

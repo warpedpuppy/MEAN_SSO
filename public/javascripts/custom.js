@@ -9,6 +9,12 @@ $(function() {
     I TRIED TO DO THIS ALL IN ANGULAR, BUT THIS PART COULDN'T CO-EXIST
     */
 
+    empower_reg_form_jquery();
+
+
+});
+
+function empower_reg_form_jquery() {
 
     //USERNAME:  IN BETWEEN 3 & 20, ONLY LETTERS OR NUMBERS
     var username_input =  $("#username_input");
@@ -32,24 +38,7 @@ $(function() {
             id.text(id.text().substring(2))
     }
 
-    username_input.bind("change paste keydown", function() {
 
-        var val = $(this).val();
-
-        if(val.length >= 3 && val.length <=20 ){
-            on(username_string_length)
-        }
-        else{
-            off(username_string_length);
-        }
-
-        if(LETTERS_NUMBERS_REGEXP.test(val)){
-            on(username_char_check);
-        }
-        else{
-            off(username_char_check);
-        }
-    });
 
     var password_input = $("#password_input");
     var password_length_check = $("#password_length_check");
@@ -60,39 +49,56 @@ $(function() {
     var LOWERCASE_REGEXP = /(?=.*[a-z])/;
     var NUMBERS_REGEXP = /\d/;
 
-    password_input.bind("change paste keyup", function() {
+
+    username_input.bind("change paste keydown", function () {
 
         var val = $(this).val();
 
-        if(val.length >= 6 && val.length <=20 ){
-            on(password_length_check);
+        if (val.length >= 3 && val.length <= 20) {
+            on(username_string_length)
         }
-        else{
-            off(password_length_check);
-        }
-
-        if(NUMBERS_REGEXP.test(val)){
-            on(password_number_check);
-        }
-        else{
-            off(password_number_check);
+        else {
+            off(username_string_length);
         }
 
-        if(LOWERCASE_REGEXP.test(val)){
-            on(password_lowercase_check);
+        if (LETTERS_NUMBERS_REGEXP.test(val)) {
+            on(username_char_check);
         }
-        else{
-            off(password_lowercase_check);
-        }
-
-        if(UPPERCASE_REGEXP.test(val)){
-            on(password_uppercase_check);
-        }
-        else{
-            off(password_uppercase_check);
+        else {
+            off(username_char_check);
         }
     });
 
+    password_input.bind("change paste keyup", function () {
 
+        var val = $(this).val();
 
-});
+        if (val.length >= 6 && val.length <= 20) {
+            on(password_length_check);
+        }
+        else {
+            off(password_length_check);
+        }
+
+        if (NUMBERS_REGEXP.test(val)) {
+            on(password_number_check);
+        }
+        else {
+            off(password_number_check);
+        }
+
+        if (LOWERCASE_REGEXP.test(val)) {
+            on(password_lowercase_check);
+        }
+        else {
+            off(password_lowercase_check);
+        }
+
+        if (UPPERCASE_REGEXP.test(val)) {
+            on(password_uppercase_check);
+        }
+        else {
+            off(password_uppercase_check);
+        }
+    });
+};

@@ -102,17 +102,19 @@ router.post('/enable_account/:key', function(req, res, next) {
         // time stamp is in milliseconds
         var time_entered = user.approval_expiration
 
-        var one_second = 1000;
-        var one_minute = 60 * one_second;
-        var one_hour = 60 * one_minute;
-        var one_day = 24 * one_hour;
-        var one_week = 7 * one_day;
+        var expiration = {};
+
+        expiration.one_second = 1000;
+        expiration.one_minute = 60 * expiration.one_second;
+        expiration.one_hour = 60 * expiration.one_minute;
+        expiration.one_day = 24 * expiration.one_hour;
+        expiration.one_week = 7 * expiration.one_day;
 
         var current_time = (!Date.now)?  new Date().getTime(): Date.now();
 
         var time_elapsed = current_time - time_entered;
 
-        if(time_elapsed > one_hour)
+        if(time_elapsed > expiration[config.authentication_expiration])
         {
           //delete record and tell person that it has been too long
 

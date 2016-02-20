@@ -5,11 +5,14 @@ html
 
     link(href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet")
     link(rel='stylesheet', href='/stylesheets/style.css')
+
     script(src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js")
     script(src="http://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.10/angular-ui-router.js")
+
+
     script(src="/javascripts/jquery.min.js")
     script(src="/javascripts/custom.js")
-
+    script(src="/javascripts/angularApp.js")
 
   body(ng-app="authentication_app")
 
@@ -37,6 +40,5 @@ html
               a(href="/#/login") Log In
             li(ng-hide="isLoggedIn()")
               a(href="/#/register") Register
-            li
-              a(ng-click='emptyDBS()', style='cursor:pointer;') empty dbs
+
     block content

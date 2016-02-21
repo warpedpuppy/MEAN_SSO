@@ -6,7 +6,7 @@ var User = mongoose.model('User');
 var jwt = require('express-jwt');
 var nodemailer = require('nodemailer');
 var auth = jwt({secret:process.env.SECRET_VAR, userProperty: 'payload'});
-
+var crypto = require('crypto');
 var env       = process.env.NODE_ENV || "development";
 var config    = require(__dirname + '/../config/config.json')[env];
 
@@ -122,29 +122,36 @@ router.get('/send_reset_link/:u', function(req, res, next) {
 
 router.post('/reset_password/',function(req, res, next) {
 
+  console.log(req.body);
+
+
   //1) delete reset key
   //2)reset password
+  //3) check expiration
   if(req.body.reset_key == 0){
     return res.status(400).json({message: 'invalid key'});
   }
 
   var username = req.body.username;
   var reset_key = req.body.reset_key;
-  var password = req.body.new_password;
+  var password = req.body.new_password_1;
   var salt = crypto.randomBytes(16).toString('hex');
-  var hash = crypto.pbkdf2Sync(password, this.salt, 1000, 64).toString('hex');
-
-
-
+  var hash = crypto.pbkdf2Sync(password, salt, 1000, 64).toString('hex');
   var query = {"username":username, "reset_key":reset_key};
-  var update = {'sale': salt, "hash":hash, "reset_key":reset_key};
+  var update = {'salt': salt, "hash":hash, "reset_key":0};
 
-
+  console.log(username+" "+reset_key)
   User.findOneAndUpdate(query, update, function (err, user) {
 
     if(err)console.log(err)
 
-    console.log("search results for "+check_username+" : "+user)
+    //f19fb28cc684dfd2b11b21c735436948
+   // d0b6cbe6c295fbac27bc44a83b09d93c2ef85489280058f5b1dbce8aa12b2772a37d0738e8945d305190e6a21cb8f4b4e3b04012af36aa81a0c454ab6249cf2d
+
+
+   // f19fb28cc684dfd2b11b21c735436948
+   // c4c836a59d94768c43be6b50a8d16c165dbafba53a047a63a888eccfacbc88af6da168a524fa98e85bd10499e10c7ffb0482707e4600f181606f6c380283d0b1
+
 
     if (user === null) {
       //this is the link doesn't exist
@@ -213,12 +220,14 @@ router.get('/check_username/:u', function(req, res, next) {
 });
 
 router.post('/login', function(req, res, next){
+
+  console.log(req.body);
   if(!req.body.username || !req.body.password){
     return res.status(400).json({message: 'Please fill out all fields'});
   }
 
   passport.authenticate('local', function(err, user, info){
-    if(err){ return next(err); }
+    if(err){ console.log(err);return next(err); }
 
     if(user){
       if(user.enabled === false)

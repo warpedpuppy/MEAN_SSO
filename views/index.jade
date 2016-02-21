@@ -34,8 +34,14 @@ block content
         .form-group
           input(id='password_input', type="password",class="form-control",name="password",placeholder="Re-type new password",ng-model="new_password_2",ng-pattern="/(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])/",ng-minlength="6",ng-maxlength='20' password required)/
 
-
         .form-group
+          p(class='mini-form orange') input valid? = <code>{{register_form.password.$valid}}</code><br>
+          p(class='mini-form orange',id='password_length_check') passwords must be >= 6 chars & <=20
+          p(class='mini-form orange',id='password_uppercase_check') passwords must have at least one uppercase
+          p(class='mini-form orange',id='password_lowercase_check') passwords must have at least one lowercase
+          p(class='mini-form orange',id='password_number_check') passwords must have at least one number
+
+    .form-group
           button(type="submit" class="btn btn-primary",ng-disabled="reset_password.$invalid") reset password
 
 

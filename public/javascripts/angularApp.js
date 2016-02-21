@@ -36,7 +36,7 @@ app.controller('ProtectedCtrl',[
     }]);
 
 
-app.controller('ResetPasswordCtrl',['$scope', 'info', '$location', '$http',function($scope,info,$location,$http){
+app.controller('ResetPasswordCtrl',['$scope', 'info', '$location', '$http', function($scope,info,$location,$http){
 
 
    // console.log($routeParams)
@@ -50,10 +50,18 @@ app.controller('ResetPasswordCtrl',['$scope', 'info', '$location', '$http',funct
             $scope.warning = "passwords must match!";
         }
         else{
-            
-            $http.post("/reset_password/").then(function(response) {
-                if(response.data.user_exists == true){
-                    $scope.success = "email with reset link was sent."
+
+            var user = {};
+            user.username = $scope.username;
+            user.reset_key = $scope.reset_key;
+            user.new_password_1 = $scope.new_password_1;
+            user.new_password_2 = $scope.new_password_2;
+
+            $http.post("/reset_password/", user).then(function(response) {
+
+                console.log(response.data)
+                if(response.data.user_exists === true){
+                    $scope.success = "record updated."
                 }
                 else{
                     $scope.success = "no such user!"

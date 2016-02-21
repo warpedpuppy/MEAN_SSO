@@ -5,6 +5,8 @@ added:
 2) expiration for that link
 3) angular form validation including check if username exists
 4) jquery validation checks
+5) added forgot password which sends reset link to user address
+6) reset password page
 
 
 //FIRST, SET THE ENVIRONMENT VARIABLE

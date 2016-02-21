@@ -26,7 +26,7 @@ router.post('/empty_dbs',function(req, res, next) {
   User.remove({}, function(err){
     if(err)console.log(err)
 
-    res.json({sucess:"sucess"});
+    res.json({success:"success"});
   });
 
 });
@@ -38,6 +38,160 @@ router.get('/protected',auth,function(req, res, next) {
   res.json({success:"this is passed from the authenticated /protected post call"})
 
 });
+
+function send_email(email_address, email_text){
+
+
+  //send email
+
+  //the following only works, because I downgraded the security on the following account
+  //https://www.google.com/settings/security/lesssecureapps
+  var smtpConfig = {
+    host: config.email_host,
+    port: config.email_port,
+    secure: true, // use SSL
+    auth: {
+      user: config.email_user,
+      pass: config.email_password
+    }
+  };
+
+  var transporter = nodemailer.createTransport(smtpConfig);
+ // var random_string = randomString(32, '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ');
+ // var text = config.site_root+"/#/reset_password?key="+random_string;
+
+
+
+
+// setup e-mail data with unicode symbols
+  var mailOptions = {
+    from: 'MEAN authentication 👥 <ted@warpedpuppy.com>', // sender address -will be email_address
+    to: config.admin_email, // list of receivers
+    subject: 'Hello ✔', // Subject line
+    text: 'Hello world ?', // plaintext body
+    html: '<a href="'+email_text+'">'+email_text+'</a>' // html body
+  };
+
+// send mail with defined transport object
+  transporter.sendMail(mailOptions, function(error, info){
+    if(error){
+      return console.log(error);
+    }
+    console.log('Message sent: ' + info.response);
+  });
+  //end send email
+
+}
+
+
+router.get('/send_reset_link/:u', function(req, res, next) {
+
+  var check_username = req.params.u.toLowerCase();
+
+  var query = {"username": check_username};
+  var random_string = randomString(32, '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ');
+  var update = {'reset_key': random_string};
+  var options = {}
+
+  console.log("is username "+check_username)
+  User.findOneAndUpdate(query, update, function (err, user) {
+
+    if(err)console.log(err)
+
+    console.log("search results for "+check_username+" : "+user)
+
+    if (user === null) {
+      //this is the link doesn't exist
+      return res.json({user_exists: false, email_sent:false})
+    }
+    else {
+
+     var email_address = user.email;
+      var username = user.username;
+      var email_text = config.site_root+"/#/reset_password?key="+random_string+"&username="+username;
+      send_email(email_address, email_text);
+      return res.json({user_exists: true, email_sent:true})
+    }
+
+  });
+
+
+});
+
+
+
+router.post('/reset_password/',function(req, res, next) {
+
+  //1) delete reset key
+  //2)reset password
+  if(req.body.reset_key == 0){
+    return res.status(400).json({message: 'invalid key'});
+  }
+
+  var username = req.body.username;
+  var reset_key = req.body.reset_key;
+  var password = req.body.new_password;
+  var salt = crypto.randomBytes(16).toString('hex');
+  var hash = crypto.pbkdf2Sync(password, this.salt, 1000, 64).toString('hex');
+
+
+
+  var query = {"username":username, "reset_key":reset_key};
+  var update = {'sale': salt, "hash":hash, "reset_key":reset_key};
+
+
+  User.findOneAndUpdate(query, update, function (err, user) {
+
+    if(err)console.log(err)
+
+    console.log("search results for "+check_username+" : "+user)
+
+    if (user === null) {
+      //this is the link doesn't exist
+      return res.json({user_exists: false, record_updated:false})
+    }
+    else {
+
+      return res.json({user_exists: true, record_updated:true})
+    }
+
+  });
+
+
+/*
+
+  var check_username = req.params.u.toLowerCase();
+
+  var query = {"username": check_username};
+  var random_string = randomString(32, '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ');
+  var update = {'reset_key': random_string};
+  var options = {}
+
+  console.log("is username "+check_username)
+  User.findOneAndUpdate(query, update, function (err, user) {
+
+    if(err)console.log(err)
+
+    console.log("search results for "+check_username+" : "+user)
+
+    if (user === null) {
+      //this is the link doesn't exist
+      return res.json({user_exists: false, email_sent:false})
+    }
+    else {
+
+      var email_address = user.email;
+      var email_text = config.site_root+"/#/reset_password?key="+random_string;
+      send_email(email_address, email_text);
+      return res.json({user_exists: true, email_sent:true})
+    }
+
+  });
+*/
+
+
+});
+
 
 router.get('/check_username/:u', function(req, res, next) {
 
@@ -91,7 +245,7 @@ router.post('/enable_account/:key', function(req, res, next) {
     User.findOneAndUpdate(query, update,  function(err, user){
 
 
-
+      console.log("update key: "+key+") "+user)
       if(user === null){
         //this is the link doesn't exist
         return res.json({token: [],info:user,allow:false, expired:false})
@@ -205,6 +359,7 @@ router.post('/register', function(req, res, next){
 
   user.username = req.body.username.toLowerCase();
   user.approval_link =random_string;
+  user.email = req.body.email.toLowerCase();
 
   user.approval_expiration = (!Date.now)?  new Date().getTime(): Date.now();
 

@@ -20,6 +20,7 @@ app.controller('NavCtrl', [
         $scope.logOut = auth.logOut;
 
         $scope.emptyDBS = function(){
+
             $http.post("/empty_dbs").success(function(data){
                 alert("dbs emptied");
             })
@@ -34,6 +35,55 @@ app.controller('ProtectedCtrl',[
 
     }]);
 
+
+app.controller('ResetPasswordCtrl',['$scope', 'info', '$location', '$http',function($scope,info,$location,$http){
+
+
+   // console.log($routeParams)
+    //console.log($location.search().username)
+    $scope.username = $location.search().username;
+    $scope.reset_key = $location.search().key;
+    $scope.resetPassword = function($routeParams){
+
+
+        if($scope.new_password_1 !== $scope.new_password_2){
+            $scope.warning = "passwords must match!";
+        }
+        else{
+            
+            $http.post("/reset_password/").then(function(response) {
+                if(response.data.user_exists == true){
+                    $scope.success = "email with reset link was sent."
+                }
+                else{
+                    $scope.success = "no such user!"
+                }
+            });
+        }
+
+
+    }
+
+
+}]);
+
+app.controller('ForgotPasswordCtrl',['$scope', 'info', 'auth', '$http',function($scope,info,auth,$http){
+
+    $scope.sendRestPasswordLink = function(){
+
+        $http.get("/send_reset_link/"+$scope.username_fp).then(function(response) {
+            if(response.data.user_exists == true){
+                    $scope.success = "email with reset link was sent."
+            }
+            else{
+                $scope.success = "no such user!"
+            }
+        });
+
+    }
+
+
+}]);
 
 app.controller('EnableCtrl',['$scope', 'info', 'auth', function($scope,info,auth){
 
@@ -72,6 +122,12 @@ app.controller('AuthCtrl', [
             $scope.info = info.info;
 
             $scope.show_password_length = true;
+
+            $scope.forgotPassword = function(){
+
+                $state.go("forgot_password")
+
+            }
 
 
 
@@ -123,7 +179,18 @@ app.directive('username',['$http','info',"$q",function($http, info, $q) {
         }
     };
 }]);
-
+/*app.directive('username_fp',['$http','info',"$q",function($http, info, $q) {
+    return {
+        require: 'ngModel',
+        link: function(scope, elm, attrs, ctrl) {
+            ctrl.$asyncValidators.usernameExists = function(username) {
+                return $http.get("/check_username/"+username).then(function(response) {
+                    return response.data.username_taken == true ? $q.reject(response.data.errorMessage) : true;
+                });
+            }
+        }
+    };
+}]);*/
 app.controller('MainCtrl', ['$scope','auth',function($scope, auth){
 
 
@@ -278,6 +345,18 @@ app.config([
                 }
             }]
         })
+        $stateProvider.state('forgot_password', {
+            url: '/forgot_password',
+            templateUrl: '/forgot_password.html',
+            controller: 'ForgotPasswordCtrl',
+            onEnter: ['$state', 'auth', function($state, auth) {
+                if (auth.isLoggedIn()) {
+
+                    $state.go('home');
+                }
+            }]
+
+        })
         $stateProvider.state('pending', {
             url: '/pending',
             templateUrl: '/pending.html',
@@ -350,6 +429,19 @@ app.config([
 
                    // alert("enable success "+data.info.username);
                 });
+            }]
+        })
+
+        $stateProvider.state('reset_password', {
+            url: '/reset_password',
+            templateUrl: '/reset_password.html',
+            controller: 'ResetPasswordCtrl',
+            onEnter: ['$state',"info",function($state, info){
+
+                //info.enable().success(function(data){
+
+                    // alert("enable success "+data.info.username);
+                //});
             }]
         })
 

@@ -130,7 +130,7 @@ router.get('/send_reset_link/:u', function(req, res, next) {
 
 
 
-router.post('/admin_change_password/',function(req, res, next) {
+router.post('/admin_change_password/',auth,function(req, res, next) {
 
 
 
@@ -162,7 +162,7 @@ router.post('/admin_change_password/',function(req, res, next) {
 });
 
 
-router.post('/admin_change_email/',function(req, res, next) {
+router.post('/admin_change_email/',auth,function(req, res, next) {
 
 
 
@@ -217,10 +217,16 @@ router.post('/reset_password/',function(req, res, next) {
 
     if(err)console.log(err);
 
-    var current_time = (!Date.now)?  new Date().getTime(): Date.now();
-    var expired_time = current_time - user.reset_expiration;
 
-    if(user === null)return res.json({user_exists: false, record_updated:false, reset_expired:false})
+    var current_time,expired_time;
+
+    if(user === null){
+      return res.json({user_exists: false, record_updated:false, reset_expired:true})
+    }
+    else{
+       current_time = (!Date.now)?  new Date().getTime(): Date.now();
+       expired_time = current_time - user.reset_expiration;
+    }
 
     if(expired_time < expiration.one_week){
 

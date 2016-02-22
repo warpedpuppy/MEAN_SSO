@@ -55,7 +55,13 @@ app.controller('AdminCtrl',[
 
             }
             else{
-                $http.post("/admin_change_password/", passwords).then(function(response) {
+
+
+
+
+                $http.post("/admin_change_password/", passwords,{
+                    headers: {Authorization: 'Bearer '+auth.getToken()}
+                }).then(function(response) {
 
 
                     if(response.data.record_updated === true){
@@ -85,7 +91,9 @@ app.controller('AdminCtrl',[
 
             }
             else{
-                $http.post("/admin_change_email/", email).then(function(response) {
+                $http.post("/admin_change_email/", email,{
+                    headers: {Authorization: 'Bearer '+auth.getToken()}
+                }).then(function(response) {
 
 
                     if(response.data.record_updated === true){
@@ -104,7 +112,7 @@ app.controller('AdminCtrl',[
     }]);
 
 
-app.controller('ResetPasswordCtrl',['$scope', 'info', '$location', '$http', function($scope,info,$location,$http){
+app.controller('ResetPasswordCtrl',['$scope', 'info', '$location', '$http', '$state',function($scope,info,$location,$http,$state){
 
 
     $scope.username = $location.search().username;
@@ -133,10 +141,12 @@ app.controller('ResetPasswordCtrl',['$scope', 'info', '$location', '$http', func
                 if(response.data.reset_expired === true){
                     $scope.warning = "reset token expired, please re-initiate"
                     $scope.show_warning = true;
+                    $state.go("login", {message:"expired"});
                 }
                 else if(response.data.user_exists === true){
                     $scope.success = "record updated."
                     $scope.show_success = true;
+                    $state.go("login", {message:"updated"});
                 }
                 else{
                     $scope.show_warning = true;
@@ -204,6 +214,21 @@ app.controller('AuthCtrl', [
         function($scope, $state, auth, info){
            // alert("auth controller");
 
+
+            $state.show_success = false;
+            $state.show_error = false;
+            if($state.params.message === "success"){
+                $state.show_success = true;
+                $state.success_message = "record updated";
+            }
+
+            if($state.params.message == "expired"){
+                alert("testing = "+$state.params.message);
+                $state.show_error = true;
+                $state.error_message = "Your reset token has expired, please re-initiate";
+            }
+
+
             empower_reg_form_jquery();
 
             $scope.user = {};
@@ -231,14 +256,16 @@ app.controller('AuthCtrl', [
                 for(var key in $scope.user){
                     if($scope.user[key] === undefined){
                         proceed = false;
-                        $scope.error.message = "one of the fields is undefined. . . hmmm."
+                        $scope.show_error = true;
+                        $scope.error_message = "one of the fields is undefined. . . hmmm."
                         break;
                     }
                 }
 
                 if(proceed === true){
                     auth.register($scope.user).error(function(error){
-                        $scope.error = error;
+                        $scope.show_error = true;
+                        $scope.error_message = error;
                     }).then(function(){
                         $state.go('pending');
                     });
@@ -248,7 +275,8 @@ app.controller('AuthCtrl', [
 
             $scope.logIn = function(){
                 auth.logIn($scope.user).error(function(error){
-                    $scope.error = error;
+                    $scope.show_error = true;
+                    $scope.error_message = error;
                 }).then(function(){
                     $state.go('home');
                 });
@@ -409,7 +437,7 @@ app.config([
                 }]
             });
         $stateProvider.state('login', {
-            url: '/login',
+            url: '/login/:message',
             templateUrl: '/login.html',
             controller: 'AuthCtrl',
             onEnter: ['$state', 'auth', function($state, auth){

@@ -197,10 +197,11 @@ block content
 
 
     .page-header
-      div(ng-show="error" class="alert alert-danger row") {{ expired_notice }}
+      div(ng-show="error" class="alert alert-danger row")
+        span {{ expired_notice }}
 
-    div(ng-show="error" class="alert alert-danger row")
-      span {{ error.message }}
+    div(ng-show="show_error" class="alert alert-danger row")
+      span {{ error_message }}
 
     form(ng-submit="register()",style="margin-top:30px;", name="register_form")
 
@@ -256,10 +257,14 @@ block content
 
 
   script(type="text/ng-template" id="/login.html")
+
     .page-header
 
-    div(ng-show="error" class="alert alert-danger row")
-      span {{ error.message }}
+    div(ng-show="success" class="alert alert-success row")
+      span {{ success_message }}
+
+    div(ng-show="show_error" class="alert alert-danger row")
+      span message = {{ error_message }}
 
     form(name="login_form", ng-submit="logIn()",style="margin-top:30px;")
       h3 Log In

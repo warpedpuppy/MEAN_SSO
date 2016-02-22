@@ -215,18 +215,23 @@ app.controller('AuthCtrl', [
            // alert("auth controller");
 
 
+            //this isn't working
             $state.show_success = false;
             $state.show_error = false;
             if($state.params.message === "success"){
                 $state.show_success = true;
                 $state.success_message = "record updated";
             }
-
+            //this isn't working
             if($state.params.message == "expired"){
                 alert("testing = "+$state.params.message);
                 $state.show_error = true;
                 $state.error_message = "Your reset token has expired, please re-initiate";
             }
+
+
+
+
 
 
             empower_reg_form_jquery();
@@ -437,10 +442,12 @@ app.config([
                 }]
             });
         $stateProvider.state('login', {
-            url: '/login/:message',
+            url: '/login/',
             templateUrl: '/login.html',
             controller: 'AuthCtrl',
             onEnter: ['$state', 'auth', function($state, auth){
+
+                alert("here")
                 if(auth.isLoggedIn()){
 
                     $state.go('home');

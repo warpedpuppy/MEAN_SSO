@@ -152,28 +152,6 @@ block content
         h2 message: {{ message_from_server.success }}
 
 
-        form(ng-submit="changeEmail()", name="change_email2")
-            h3 change your email address
-          .form-group
-            input(id='current_email2', type="text",class="form-control",name="current_email",ng-model="current_email", placeholder="type current email" required)/
-          .form-group
-            p(class='mini-form' ng-class="change_email2.current_email.$valid === false?'orange':'green'") format valid? =
-              code(ng-class="change_email2.current_email.$valid === false?'orange':'green'") {{change_email2.current_email.$valid}}
-          .form-group
-            input(id='email_input_1', type="email",class="form-control",name="email1",ng-model="email_1",placeholder="New Email" email2 required)/
-          .form-group
-            p(class='mini-form' ng-class="change_email.email1.$valid === false?'orange':'green'") format valid? =
-              code(ng-class="change_email.email1.$valid === false?'orange':'green'") {{change_email.email1.$valid}}
-          .form-group
-            input(id='email_input_2', type="email",class="form-control",name="email2",placeholder="Re-type new email",ng-model="email_2" email2 required)/
-          .form-group
-            p(class='mini-form' ng-class="change_email.email2.$valid === false?'orange':'green'") input valid? =
-              code(ng-class="change_email.email2.$valid === false?'orange':'green'") {{change_email.email2.$valid}}
-            .form-group
-            button(type="submit" class="btn btn-primary",ng-disabled="change_email.$invalid") change email
-
-
-
 
 
 

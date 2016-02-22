@@ -238,11 +238,11 @@ block content
 
     .page-header
 
-    div(ng-show="success" class="alert alert-success row")
+    div(ng-show="show_success" class="alert alert-success row")
       span {{ success_message }}
 
     div(ng-show="show_error" class="alert alert-danger row")
-      span message = {{ error_message }}
+      span {{ error_message }}
 
     form(name="login_form", ng-submit="logIn()",style="margin-top:30px;")
       h3 Log In

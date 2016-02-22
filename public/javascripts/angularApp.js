@@ -112,7 +112,7 @@ app.controller('AdminCtrl',[
     }]);
 
 
-app.controller('ResetPasswordCtrl',['$scope', 'info', '$location', '$http', '$state',function($scope,info,$location,$http,$state){
+app.controller('ResetPasswordCtrl',['$scope', 'info', '$location', '$http', '$state','hermes',function($scope,info,$location,$http,$state,hermes){
 
 
     $scope.username = $location.search().username;
@@ -141,12 +141,15 @@ app.controller('ResetPasswordCtrl',['$scope', 'info', '$location', '$http', '$st
                 if(response.data.reset_expired === true){
                     $scope.warning = "reset token expired, please re-initiate"
                     $scope.show_warning = true;
-                    $state.go("login", {message:"expired"});
+
+                    hermes.add_message("expired")
+                    $state.go("login");
                 }
                 else if(response.data.user_exists === true){
                     $scope.success = "record updated."
                     $scope.show_success = true;
-                    $state.go("login", {message:"updated"});
+                    hermes.add_message("updated")
+                    $state.go("login");
                 }
                 else{
                     $scope.show_warning = true;
@@ -211,28 +214,22 @@ app.controller('AuthCtrl', [
         '$state',
         'auth',
         'info',
-        function($scope, $state, auth, info){
-           // alert("auth controller");
+        'hermes',
+        function($scope, $state, auth, info,hermes){
 
 
-            //this isn't working
-            $state.show_success = false;
-            $state.show_error = false;
-            if($state.params.message === "success"){
-                $state.show_success = true;
-                $state.success_message = "record updated";
-            }
-            //this isn't working
-            if($state.params.message == "expired"){
-                alert("testing = "+$state.params.message);
-                $state.show_error = true;
-                $state.error_message = "Your reset token has expired, please re-initiate";
+
+            if(hermes.message == 'updated'){
+                $scope.show_success = true;
+                $scope.success_message = "The record was updated.";
+                hermes.message = undefined;
             }
 
-
-
-
-
+            if(hermes.message == 'expired'){
+                $scope.show_error = true;
+                $scope.error_message = "Reset token expired. Please click 'forgot password' again.";
+                hermes.message = undefined;
+            }
 
             empower_reg_form_jquery();
 
@@ -328,6 +325,7 @@ app.factory('info', ['$http', '$location','auth',"$state", function($http,$locat
         info:[]
     };
 
+
     o.enable = function(){
          return $http.post("/enable_account/"+$location.search().key).success(function(data){
             //alert(data.info.username);
@@ -349,7 +347,15 @@ app.factory('info', ['$http', '$location','auth',"$state", function($http,$locat
     }
     return o;
 }])
+app.factory('hermes', ['$http', '$window',  '$state', function($http, $window, $state) {
 
+    var hermes = {};
+    hermes.add_message = function(str){
+        hermes.message = str;
+    }
+    return hermes;
+
+}]);
 app.factory('auth', ['$http', '$window',  '$state', function($http, $window, $state){
 
 
@@ -442,12 +448,12 @@ app.config([
                 }]
             });
         $stateProvider.state('login', {
-            url: '/login/',
+            url: '/login',
             templateUrl: '/login.html',
             controller: 'AuthCtrl',
             onEnter: ['$state', 'auth', function($state, auth){
 
-                alert("here")
+
                 if(auth.isLoggedIn()){
 
                     $state.go('home');

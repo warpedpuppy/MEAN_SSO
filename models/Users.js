@@ -13,6 +13,7 @@ var UserSchema = new mongoose.Schema({
     approval_link:String,
     approval_expiration:Number,
     reset_key:String,
+    reset_expiration:Number,
     enabled:{type: Boolean, default:false}
 });
 

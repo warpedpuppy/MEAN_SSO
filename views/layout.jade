@@ -30,10 +30,13 @@ html
         .collapse.navbar-collapse#bs-example-navbar-collapse-1
           ul.nav.navbar-nav.navbar-right
 
-            li(ng-show="isLoggedIn()")
-              a(href='/#/protected') Protected Zone
+
             li(ng-show="isLoggedIn()")
               a(href='/#/home') {{ currentUser() | uppercase}}'s page
+            li(ng-show="isLoggedIn()")
+                a(href='/#/protected') Protected Zone
+            li(ng-show="isLoggedIn()")
+              a(href='/#/admin') Admin
             li(ng-show="isLoggedIn()")
               a(href="", ng-click="logOut()") Log Out
             li(ng-hide="isLoggedIn()")

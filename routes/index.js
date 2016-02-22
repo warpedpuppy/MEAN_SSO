@@ -10,6 +10,14 @@ var crypto = require('crypto');
 var env       = process.env.NODE_ENV || "development";
 var config    = require(__dirname + '/../config/config.json')[env];
 
+var expiration = {};
+expiration.one_second = 1000;
+expiration.one_minute = 60 * expiration.one_second;
+expiration.one_hour = 60 * expiration.one_minute;
+expiration.one_day = 24 * expiration.one_hour;
+expiration.one_week = 7 * expiration.one_day;
+
+
 /* GET home page. */
 router.get('/', function(req, res, next) {
 
@@ -88,9 +96,10 @@ router.get('/send_reset_link/:u', function(req, res, next) {
 
   var check_username = req.params.u.toLowerCase();
 
+  var current_time = (!Date.now)?  new Date().getTime(): Date.now();
   var query = {"username": check_username};
   var random_string = randomString(32, '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ');
-  var update = {'reset_key': random_string};
+  var update = {'reset_key': random_string, reset_expiration:current_time};
   var options = {}
 
   console.log("is username "+check_username)
@@ -120,9 +129,71 @@ router.get('/send_reset_link/:u', function(req, res, next) {
 
 
 
+
+router.post('/admin_change_password/',function(req, res, next) {
+
+
+
+  var username = req.body.username;
+  var password = req.body.new_password_1;
+  var salt = crypto.randomBytes(16).toString('hex');
+  var hash = crypto.pbkdf2Sync(password, salt, 1000, 64).toString('hex');
+
+  var query = {"username":username};
+  var update = {'salt': salt, "hash":hash};
+
+
+
+      User.findOneAndUpdate(query, update, function (err, user) {
+        if (user === null) {
+          //this is the link doesn't exist
+          return res.json({user_exists: false, record_updated:false})
+        }
+        else {
+          return res.json({user_exists: true, record_updated:true})
+        }
+
+      });
+
+
+
+
+
+});
+
+
+router.post('/admin_change_email/',function(req, res, next) {
+
+
+
+  var username = req.body.username;
+  var email = req.body.new_email_1;
+  var query = {"username":username};
+  var update = {'email': email};
+
+
+
+  User.findOneAndUpdate(query, update, function (err, user) {
+    if (user === null) {
+      //this is the link doesn't exist
+      return res.json({user_exists: false, record_updated:false})
+    }
+    else {
+      return res.json({user_exists: true, record_updated:true})
+    }
+
+  });
+
+
+
+
+
+});
+
+
 router.post('/reset_password/',function(req, res, next) {
 
-  console.log(req.body);
+ // console.log(req.body);
 
 
   //1) delete reset key
@@ -140,29 +211,37 @@ router.post('/reset_password/',function(req, res, next) {
   var query = {"username":username, "reset_key":reset_key};
   var update = {'salt': salt, "hash":hash, "reset_key":0};
 
-  console.log(username+" "+reset_key)
-  User.findOneAndUpdate(query, update, function (err, user) {
-
-    if(err)console.log(err)
-
-    //f19fb28cc684dfd2b11b21c735436948
-   // d0b6cbe6c295fbac27bc44a83b09d93c2ef85489280058f5b1dbce8aa12b2772a37d0738e8945d305190e6a21cb8f4b4e3b04012af36aa81a0c454ab6249cf2d
 
 
-   // f19fb28cc684dfd2b11b21c735436948
-   // c4c836a59d94768c43be6b50a8d16c165dbafba53a047a63a888eccfacbc88af6da168a524fa98e85bd10499e10c7ffb0482707e4600f181606f6c380283d0b1
+  User.findOne(query, function(err, user){
 
+    if(err)console.log(err);
 
-    if (user === null) {
-      //this is the link doesn't exist
-      return res.json({user_exists: false, record_updated:false})
-    }
-    else {
+    var current_time = (!Date.now)?  new Date().getTime(): Date.now();
+    var expired_time = current_time - user.reset_expiration;
 
-      return res.json({user_exists: true, record_updated:true})
+    if(user === null)return res.json({user_exists: false, record_updated:false, reset_expired:false})
+
+    if(expired_time < expiration.one_week){
+
+        User.findOneAndUpdate(query, update, function (err, user) {
+          if (user === null) {
+            //this is the link doesn't exist
+            return res.json({user_exists: false, record_updated:false, reset_expired:false})
+          }
+          else {
+            return res.json({user_exists: true, record_updated:true, reset_expired:false})
+          }
+
+        });
+      }
+    else{
+      //took too long
+      return res.json({user_exists: false, record_updated:false, reset_expired:true})
     }
 
   });
+
 
 
 /*
@@ -265,13 +344,7 @@ router.post('/enable_account/:key', function(req, res, next) {
         // time stamp is in milliseconds
         var time_entered = user.approval_expiration
 
-        var expiration = {};
 
-        expiration.one_second = 1000;
-        expiration.one_minute = 60 * expiration.one_second;
-        expiration.one_hour = 60 * expiration.one_minute;
-        expiration.one_day = 24 * expiration.one_hour;
-        expiration.one_week = 7 * expiration.one_day;
 
         var current_time = (!Date.now)?  new Date().getTime(): Date.now();
 

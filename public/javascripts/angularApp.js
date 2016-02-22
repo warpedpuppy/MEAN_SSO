@@ -34,20 +34,88 @@ app.controller('ProtectedCtrl',[
         $scope.message_from_server = auth.message_from_server;
 
     }]);
+app.controller('AdminCtrl',[
+    '$scope',
+    'auth','$http',
+    function($scope,auth,$http){
+        $scope.change_password_show = true;
+        $scope.error = false;
+        $scope.show_success = false;
+
+        $scope.changePassword  = function(){
+            var passwords = {};
+            passwords.username = auth.currentUser();
+            passwords.new_password_1 = $scope.new_password_1;
+            passwords.new_password_2 = $scope.new_password_2;
+
+            if(passwords.new_password_1 !== passwords.new_password_2){
+                alert(passwords.new_password_1+" "+passwords.new_password_2)
+                $scope.error = true;
+                $scope.warning = "passwords don't match";
+
+            }
+            else{
+                $http.post("/admin_change_password/", passwords).then(function(response) {
+
+
+                    if(response.data.record_updated === true){
+                        $scope.success = "password updated";
+                        $scope.show_success = true;
+                    }
+                    else{
+                        $scope.error = true;
+                        $scope.warning = "there was a problem, please try again."
+                    }
+                });
+            }
+
+
+
+        }
+        $scope.changeEmail  = function(){
+            var email = {};
+            email.username = auth.currentUser();
+            email.new_email_1 = $scope.new_email_1;
+            email.new_email_2 = $scope.new_email_2;
+
+            if(email.new_email_1 !== email.new_email_2){
+                alert(email.new_email_1+" "+email.new_email_2)
+                $scope.error = true;
+                $scope.warning = "emails don't match";
+
+            }
+            else{
+                $http.post("/admin_change_email/", email).then(function(response) {
+
+
+                    if(response.data.record_updated === true){
+                        $scope.success = "email updated";
+                        $scope.show_success = true;
+                    }
+                    else{
+                        $scope.error = true;
+                        $scope.warning = "there was a problem, please try again."
+                    }
+                });
+            }
+
+
+        }
+    }]);
 
 
 app.controller('ResetPasswordCtrl',['$scope', 'info', '$location', '$http', function($scope,info,$location,$http){
 
 
-   // console.log($routeParams)
-    //console.log($location.search().username)
     $scope.username = $location.search().username;
     $scope.reset_key = $location.search().key;
-    $scope.resetPassword = function($routeParams){
-
+    $scope.show_warning = false;
+    $scope.show_success = false;
+    $scope.resetPassword = function(){
 
         if($scope.new_password_1 !== $scope.new_password_2){
             $scope.warning = "passwords must match!";
+            $scope.show_warning = true;
         }
         else{
 
@@ -59,12 +127,20 @@ app.controller('ResetPasswordCtrl',['$scope', 'info', '$location', '$http', func
 
             $http.post("/reset_password/", user).then(function(response) {
 
-                console.log(response.data)
-                if(response.data.user_exists === true){
+
+
+
+                if(response.data.reset_expired === true){
+                    $scope.warning = "reset token expired, please re-initiate"
+                    $scope.show_warning = true;
+                }
+                else if(response.data.user_exists === true){
                     $scope.success = "record updated."
+                    $scope.show_success = true;
                 }
                 else{
-                    $scope.success = "no such user!"
+                    $scope.show_warning = true;
+                    $scope.warning = "no such user!"
                 }
             });
         }
@@ -77,14 +153,18 @@ app.controller('ResetPasswordCtrl',['$scope', 'info', '$location', '$http', func
 
 app.controller('ForgotPasswordCtrl',['$scope', 'info', 'auth', '$http',function($scope,info,auth,$http){
 
+    $scope.show_forgot_password_form = true;
+    $scope.error = false;
     $scope.sendRestPasswordLink = function(){
 
         $http.get("/send_reset_link/"+$scope.username_fp).then(function(response) {
             if(response.data.user_exists == true){
-                    $scope.success = "email with reset link was sent."
+                    $scope.success = "Email with reset link was sent. Please check your inbox."
+                $scope.show_forgot_password_form = false;
             }
             else{
-                $scope.success = "no such user!"
+                $scope.error = true;
+                $scope.error_message = "no such user!"
             }
         });
 
@@ -214,18 +294,7 @@ app.factory('info', ['$http', '$location','auth',"$state", function($http,$locat
     var o = {
         info:[]
     };
-    o.set_username = function(string){
-        console.log("inside info = "+string)
-        if(!o.info)o.info = {};
-        o.info.username = string;
 
-
-    }
-    o.get_username = function(){
-        return o.info.username;
-
-
-    }
     o.enable = function(){
          return $http.post("/enable_account/"+$location.search().key).success(function(data){
             //alert(data.info.username);
@@ -384,6 +453,22 @@ app.config([
             url: '/expired',
             templateUrl: '/expired.html',
             controller: 'MainCtrl'
+        })
+        $stateProvider.state('admin', {
+            url: '/admin',
+            templateUrl: '/admin.html',
+            controller: 'AdminCtrl',
+            onEnter: ['$state',  'auth', function($state,auth){
+                if(auth.isLoggedIn()){
+                    auth.server_auth_check().success(function(data){
+                        console.log('YES = '+data.success)
+                    })
+
+                }
+                else{
+                    $state.go('login');
+                }
+            }]
         })
 
 

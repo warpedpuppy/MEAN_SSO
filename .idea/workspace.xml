@@ -3,6 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="42c31e55-5bbc-4d89-9d5a-28ee87307a0c" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/README.md" afterPath="$PROJECT_DIR$/README.md" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="mean_authentication.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -113,8 +114,8 @@
             <state />
           </provider>
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.61085975" vertical-offset="45" max-vertical-offset="795">
-              <caret line="21" column="0" selection-start-line="21" selection-start-column="0" selection-end-line="21" selection-end-column="0" />
+            <state vertical-scroll-proportion="0.81447965" vertical-offset="105" max-vertical-offset="990">
+              <caret line="31" column="0" selection-start-line="31" selection-start-column="0" selection-end-line="31" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -133,8 +134,8 @@
       <file leaf-file-name="config.json" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/config/config.json">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-6.875" vertical-offset="0" max-vertical-offset="675">
-              <caret line="11" column="53" selection-start-line="11" selection-start-column="53" selection-end-line="11" selection-end-column="53" />
+            <state vertical-scroll-proportion="-3.125" vertical-offset="0" max-vertical-offset="675">
+              <caret line="5" column="21" selection-start-line="5" selection-start-column="21" selection-end-line="5" selection-end-column="21" />
               <folding />
             </state>
           </provider>
@@ -683,7 +684,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="168623000" />
+    <option name="totallyTimeSpent" value="168797000" />
   </component>
   <component name="TodoView" selected-index="0">
     <todo-panel id="selected-file">
@@ -1192,8 +1193,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/config/config.json">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-6.875" vertical-offset="0" max-vertical-offset="675">
-          <caret line="11" column="53" selection-start-line="11" selection-start-column="53" selection-end-line="11" selection-end-column="53" />
+        <state vertical-scroll-proportion="-3.125" vertical-offset="0" max-vertical-offset="675">
+          <caret line="5" column="21" selection-start-line="5" selection-start-column="21" selection-end-line="5" selection-end-column="21" />
           <folding />
         </state>
       </provider>
@@ -1203,8 +1204,8 @@
         <state />
       </provider>
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.61085975" vertical-offset="45" max-vertical-offset="795">
-          <caret line="21" column="0" selection-start-line="21" selection-start-column="0" selection-end-line="21" selection-end-column="0" />
+        <state vertical-scroll-proportion="0.81447965" vertical-offset="105" max-vertical-offset="990">
+          <caret line="31" column="0" selection-start-line="31" selection-start-column="0" selection-end-line="31" selection-end-column="0" />
           <folding />
         </state>
       </provider>

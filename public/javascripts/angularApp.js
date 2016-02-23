@@ -4,40 +4,46 @@
 
 var app = angular.module('authentication_app', ['ui.router']);
 
+app.filter('capitalize', function() {
+    return function(input, all) {
+        var reg = (all) ? /([^\W_]+[^\s-]*) */g : /([^\W_]+[^\s-]*)/;
+        return (!!input) ? input.replace(reg, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();}) : '';
+    }
+});
 
-app.controller('NavCtrl', [
-    '$scope',
-    'auth',
-    '$http',
-    '$filter',
-    function($scope, auth, $http, $filter){
 
+app.controller('MainCtrl', ['$scope','auth',function($scope, auth){
+    $scope.isLoggedIn = auth.isLoggedIn;
+    $scope.currentUser = auth.currentUser;
 
-        $filter('uppercase')()
+}]);
+
+app.controller('NavCtrl', ['$scope', 'auth', '$http', function($scope, auth, $http, $filter){
 
         $scope.isLoggedIn = auth.isLoggedIn;
         $scope.currentUser = auth.currentUser;
         $scope.logOut = auth.logOut;
 
         $scope.emptyDBS = function(){
-
             $http.post("/empty_dbs").success(function(data){
                 alert("dbs emptied");
             })
-
         }
-    }]);
-app.controller('ProtectedCtrl',[
-    '$scope',
-        'auth',
-    function($scope,auth){
-        $scope.message_from_server = auth.message_from_server;
 
     }]);
-app.controller('AdminCtrl',[
-    '$scope',
-    'auth','$http',
-    function($scope,auth,$http){
+
+app.controller('MembersCtrl',['$scope', 'auth', '$http', function($scope,auth,$http){
+
+            $http.get("/members",{
+                headers: {Authorization: 'Bearer '+auth.getToken()}
+            }).success(function(data){
+            $scope.members = data;
+
+        })
+
+    }]);
+
+app.controller('AdminCtrl',['$scope', 'auth','$http', function($scope,auth,$http){
         $scope.change_password_show = true;
         $scope.error = false;
         $scope.show_success = false;
@@ -55,14 +61,9 @@ app.controller('AdminCtrl',[
 
             }
             else{
-
-
-
-
                 $http.post("/admin_change_password/", passwords,{
                     headers: {Authorization: 'Bearer '+auth.getToken()}
                 }).then(function(response) {
-
 
                     if(response.data.record_updated === true){
                         $scope.success = "password updated";
@@ -74,10 +75,8 @@ app.controller('AdminCtrl',[
                     }
                 });
             }
-
-
-
         }
+
         $scope.changeEmail  = function(){
             var email = {};
             email.username = auth.currentUser();
@@ -135,9 +134,6 @@ app.controller('ResetPasswordCtrl',['$scope', 'info', '$location', '$http', '$st
 
             $http.post("/reset_password/", user).then(function(response) {
 
-
-
-
                 if(response.data.reset_expired === true){
                     $scope.warning = "reset token expired, please re-initiate"
                     $scope.show_warning = true;
@@ -157,11 +153,7 @@ app.controller('ResetPasswordCtrl',['$scope', 'info', '$location', '$http', '$st
                 }
             });
         }
-
-
     }
-
-
 }]);
 
 app.controller('ForgotPasswordCtrl',['$scope', 'info', 'auth', '$http',function($scope,info,auth,$http){
@@ -180,44 +172,17 @@ app.controller('ForgotPasswordCtrl',['$scope', 'info', 'auth', '$http',function(
                 $scope.error_message = "no such user!"
             }
         });
-
     }
-
-
 }]);
 
 app.controller('EnableCtrl',['$scope', 'info', 'auth', function($scope,info,auth){
-
-
     $scope.info = info.info;
-
 }]);
 
 
-app.controller('PendingCtrl',[
-    '$scope',
-        function($scope){
+app.controller('PendingCtrl',['$scope', function($scope){}]);
 
-
-        }]);
-app.controller('UsersCtrl', [
-    '$scope',
-    'auth',
-    function($scope, auth){
-        $scope.isLoggedIn = auth.isLoggedIn;
-        $scope.currentUser = auth.currentUser;
-        $scope.logOut = auth.logOut;
-    }]);
-
-app.controller('AuthCtrl', [
-        '$scope',
-        '$state',
-        'auth',
-        'info',
-        'hermes',
-        function($scope, $state, auth, info,hermes){
-
-
+app.controller('AuthCtrl', ['$scope', '$state', 'auth', 'info', 'hermes', function($scope, $state, auth, info,hermes){
 
             if(hermes.message == 'updated'){
                 $scope.show_success = true;
@@ -231,6 +196,12 @@ app.controller('AuthCtrl', [
                 hermes.message = undefined;
             }
 
+            if(hermes.message == 'registration expired'){
+                $scope.show_error = true;
+                $scope.error_message = "This registration link has expired, please re-register.";
+                hermes.message = undefined;
+            }
+
             empower_reg_form_jquery();
 
             $scope.user = {};
@@ -239,21 +210,11 @@ app.controller('AuthCtrl', [
             $scope.show_password_length = true;
 
             $scope.forgotPassword = function(){
-
                 $state.go("forgot_password")
-
-            }
-
-
-
-            if($scope.info.expired == true){
-                alert("expired");
-                $scope.expired_notice ="That was expired, please re-register."
             }
 
             $scope.register = function(){
 
-                console.log($scope.user)
                 var proceed = true;
                 for(var key in $scope.user){
                     if($scope.user[key] === undefined){
@@ -297,41 +258,22 @@ app.directive('username',['$http','info',"$q",function($http, info, $q) {
         }
     };
 }]);
-/*app.directive('username_fp',['$http','info',"$q",function($http, info, $q) {
-    return {
-        require: 'ngModel',
-        link: function(scope, elm, attrs, ctrl) {
-            ctrl.$asyncValidators.usernameExists = function(username) {
-                return $http.get("/check_username/"+username).then(function(response) {
-                    return response.data.username_taken == true ? $q.reject(response.data.errorMessage) : true;
-                });
-            }
-        }
-    };
-}]);*/
-app.controller('MainCtrl', ['$scope','auth',function($scope, auth){
 
 
-    $scope.isLoggedIn = auth.isLoggedIn;
-    $scope.currentUser = auth.currentUser;
-  //  alert("main")
 
-   // $scope.user.email = "test@tugtug.com";
 
-}]);
 
-app.factory('info', ['$http', '$location','auth',"$state", function($http,$location,auth,$state){
+app.factory('info', ['$http', '$location','auth',"$state", "hermes",function($http,$location,auth,$state,hermes){
     var o = {
         info:[]
     };
 
-
     o.enable = function(){
          return $http.post("/enable_account/"+$location.search().key).success(function(data){
-            //alert(data.info.username);
-             if(data.expired == true){
 
-                 angular.copy(data, o.info)
+             if(data.expired === true){
+
+                 hermes.add_message("registration expired");
                  $state.go("register");
              }
             else if(data.allow == false){
@@ -347,6 +289,8 @@ app.factory('info', ['$http', '$location','auth',"$state", function($http,$locat
     }
     return o;
 }])
+
+
 app.factory('hermes', ['$http', '$window',  '$state', function($http, $window, $state) {
 
     var hermes = {};
@@ -395,11 +339,7 @@ app.factory('auth', ['$http', '$window',  '$state', function($http, $window, $st
     auth.register = function(user){
 
         return $http.post('/register', user).success(function(data){
-            //don't save token because must wait for approval
-            //auth.saveToken(data.token);
-
             $state.go("pending");
-            //alert("register success");
         });
     };
     auth.logIn = function(user){
@@ -414,13 +354,10 @@ app.factory('auth', ['$http', '$window',  '$state', function($http, $window, $st
 
     };
     auth.server_auth_check = function() {
-        return $http.get('/protected', {
+        return $http.get('/members', {
             headers: {Authorization: 'Bearer '+auth.getToken()}
         }).success(function(data){
-            //alert(data.success)
-
             angular.copy(data, auth.message_from_server);
-            //alert( auth.message_from_server.success)
         });
     };
     return auth;
@@ -438,13 +375,10 @@ app.config([
                 templateUrl: '/home.html',
                 controller: 'MainCtrl',
                 onEnter: ['$state', 'auth', function($state, auth){
-                    if(auth.isLoggedIn()){
-
-
-                    }
-                    else{
+                    if(!auth.isLoggedIn()){
                         $state.go('login');
                     }
+
                 }]
             });
         $stateProvider.state('login', {
@@ -452,14 +386,9 @@ app.config([
             templateUrl: '/login.html',
             controller: 'AuthCtrl',
             onEnter: ['$state', 'auth', function($state, auth){
-
-
                 if(auth.isLoggedIn()){
 
                     $state.go('home');
-                }
-                else{
-
                 }
             }]
         })
@@ -469,7 +398,6 @@ app.config([
             controller: 'ForgotPasswordCtrl',
             onEnter: ['$state', 'auth', function($state, auth) {
                 if (auth.isLoggedIn()) {
-
                     $state.go('home');
                 }
             }]
@@ -480,20 +408,10 @@ app.config([
             templateUrl: '/pending.html',
             controller: 'PendingCtrl',
             onEnter: ['$state', "$http","$location", "auth",function($state,$http,$location,auth){
-
                 if(auth.isLoggedIn()){
-
                     $state.go('home');
                 }
-                else{
-
-                }
             }]
-        })
-        $stateProvider.state('expired', {
-            url: '/expired',
-            templateUrl: '/expired.html',
-            controller: 'MainCtrl'
         })
         $stateProvider.state('admin', {
             url: '/admin',
@@ -501,9 +419,9 @@ app.config([
             controller: 'AdminCtrl',
             onEnter: ['$state',  'auth', function($state,auth){
                 if(auth.isLoggedIn()){
-                    auth.server_auth_check().success(function(data){
-                        console.log('YES = '+data.success)
-                    })
+                 /*   auth.server_auth_check().success(function(data){
+                        //console.log('YES = '+data.success)
+                    })*/
 
                 }
                 else{
@@ -514,23 +432,16 @@ app.config([
 
 
 
-        $stateProvider.state('protected', {
-            url: '/protected',
-            templateUrl: '/protected.html',
-            controller: 'ProtectedCtrl',
+        $stateProvider.state('members', {
+            url: '/members',
+            templateUrl: '/members.html',
+            controller: 'MembersCtrl',
             onEnter: ['$state',  'auth', function($state,auth){
 
-                //here we have a 2x check -- first checks locally and then goes and hits a link on the server
-                //that is protected by auth. this may be overkill
-                 if(auth.isLoggedIn()){
-                    auth.server_auth_check().success(function(data){
-                        //console.log('YES = '+data.success)
-                    })
+                 if(!auth.isLoggedIn()){
+                     $state.go('login');
+                }
 
-                }
-                else{
-                    $state.go('login');
-                }
             }]
         })
 
@@ -539,15 +450,8 @@ app.config([
                 templateUrl: '/register.html',
                 controller: 'AuthCtrl',
                 onEnter: ['$state', 'auth', function($state, auth){
-
-
-
                     if(auth.isLoggedIn()){
-
                         $state.go('home');
-                    }
-                    else{
-                        //$state.go('enable');
                     }
                 }]
             });
@@ -560,7 +464,6 @@ app.config([
             onEnter: ['$state',"info",function($state, info){
 
                 info.enable().success(function(data){
-
                    // alert("enable success "+data.info.username);
                 });
             }]
@@ -572,10 +475,6 @@ app.config([
             controller: 'ResetPasswordCtrl',
             onEnter: ['$state',"info",function($state, info){
 
-                //info.enable().success(function(data){
-
-                    // alert("enable success "+data.info.username);
-                //});
             }]
         })
 

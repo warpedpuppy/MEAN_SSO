@@ -8,18 +8,33 @@
     "admin_email":"ted@warpedpuppy.com",
     "site_root":"http://localhost:3000",
     "authentication_expiration":"one_week",
+    "reset_password_expiration":"one_hour",
+    "expiration_choices":"one_second, one_minute, one_hour, one_day, one_week",
+    "secret_var_name": "SECRET_VAR",
     "email_port":465
   },
   "test": {
     "email_host": "smtp.gmail.com",
     "email_user": "ashland2468@gmail.com",
     "email_password": "tugtugtugtug",
+    "admin_email":"ted@warpedpuppy.com",
+    "site_root":"http://localhost:3000",
+    "authentication_expiration":"one_week",
+    "reset_password_expiration":"one_hour",
+    "expiration_choices":"one_second, one_minute, one_hour, one_day, one_week",
+    "secret_var_name": "SECRET_VAR",
     "email_port":465
   },
   "production": {
     "email_host": "smtp.gmail.com",
     "email_user": "ashland2468@gmail.com",
     "email_password": "tugtugtugtug",
+    "admin_email":"ted@warpedpuppy.com",
+    "site_root":"http://localhost:3000",
+    "authentication_expiration":"one_week",
+    "reset_password_expiration":"one_hour",
+    "expiration_choices":"one_second, one_minute, one_hour, one_day, one_week",
+    "secret_var_name": "SECRET_VAR",
     "email_port":465
   }
 }

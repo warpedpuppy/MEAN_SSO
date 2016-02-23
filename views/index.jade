@@ -12,13 +12,12 @@ block content
     .page-header
       div(class="alert alert-success row")
         p Congrats,your account has been enabled!
-        p Welcome, {{ info.username | uppercase}}!
+        p Welcome, {{ info.username | capitalize}}!
 
   script(type="text/ng-template" id="/admin.html")
-    .page-header
-      h2 ADMIN
 
-    .row
+
+    .row.text-center
         ul.pagination
           li(ng-class="{active: change_password_show}")
             a(ng-click="change_password_show = true") change password
@@ -72,7 +71,7 @@ block content
           input(id='email_input_2', type="email",class="form-control",name="email2",placeholder="Re-type new email",ng-model="new_email_2" required)/
 
         .form-group
-          p(class='mini-form' ng-class="change_email.email2.$valid === false?'orange':'green'") input valid? =
+          p(class='mini-form' ng-class="change_email.email2.$valid === false?'orange':'green'") format valid? =
             code(ng-class="change_email.email2.$valid === false?'orange':'green'") {{change_email.email2.$valid}}
 
 
@@ -146,10 +145,19 @@ block content
     .page-header
       h1 EXPIRED
 
-  script(type="text/ng-template" id="/protected.html")
+  script(type="text/ng-template" id="/members.html")
     .page-header
-        h1 PROTECTED
-        h2 message: {{ message_from_server.success }}
+        h1 members:
+        table(class='table table-striped')
+          thead
+            tr
+              th name
+              th email address
+          tbody
+            tr(ng-repeat='member in members')
+              td {{member.username}}
+              td {{member.email}}
+
 
 
 
@@ -167,7 +175,7 @@ block content
   script(type="text/ng-template" id="/home.html")
     .page-header
 
-        h1(ng-show="isLoggedIn()") welcome home {{ currentUser() }}
+        h1(ng-show="isLoggedIn()") Welcome home, {{ currentUser() | capitalize }}!
         h1(ng-hide="isLoggedIn()") you are not logged in.
 
   script(type="text/ng-template" id="/register.html")

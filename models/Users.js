@@ -4,6 +4,8 @@
 var mongoose = require('mongoose');
 var crypto = require('crypto');
 var jwt = require('jsonwebtoken');
+var env       = process.env.NODE_ENV || "development";
+var config    = require(__dirname + '/../config/config.json')[env];
 
 var UserSchema = new mongoose.Schema({
     username: {type: String, lowercase: true, unique: true},
@@ -40,7 +42,7 @@ UserSchema.methods.generateJWT = function() {
         _id: this._id,
         username: this.username,
         exp: parseInt(exp.getTime() / 1000)
-    }, process.env.SECRET_VAR);
+    }, process.env[config.secret_var_name]);
 };
 
 mongoose.model('User', UserSchema);

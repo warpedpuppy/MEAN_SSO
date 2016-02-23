@@ -32,9 +32,9 @@ html
 
 
             li(ng-show="isLoggedIn()")
-              a(href='/#/home') {{ currentUser() | uppercase}}'s page
+              a(href='/#/home') {{ currentUser() | capitalize}}'s page
             li(ng-show="isLoggedIn()")
-                a(href='/#/protected') Protected Zone
+                a(href='/#/members') Members
             li(ng-show="isLoggedIn()")
               a(href='/#/admin') Admin
             li(ng-show="isLoggedIn()")

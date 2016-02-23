@@ -7,21 +7,21 @@ features:
 
 2) Upon registration, link sent via email to confirm registration
 
-2) Configurable expiration for that registration link
+3) Configurable expiration for that registration link
 
-3) Angular form validation including check if username exists
+4) Angular form validation including check if username exists
 
-4) jquery validation checks
+5) jquery validation checks
 
-5) Forgot password  sends reset link to user's email address
+6) Forgot password  sends reset link to user's email address
 
-6) Reset password page
+7) Reset password page
 
-7) Configurable expiration for reset password page
+8) Configurable expiration for reset password page
 
-8) Admin section with change email & password
+9) Admin section with change email & password
 
-9) and I'm sure others that I'm not thinking of right now. . .
+10) and I'm sure others that I'm not thinking of right now. . .
 
 
 to be added:

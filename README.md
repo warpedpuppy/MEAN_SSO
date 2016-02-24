@@ -1,11 +1,11 @@
 ********************
 Welcome!  This is very much a work in progress.
 
-features:
+First, I started with the login/registration/authentication from this tutorial: https://thinkster.io/mean-stack-tutorial#adding-some-style
 
-1) login, registration, forgot password, change email, change password
+Second, I've added a bunch of features:
 
-2) Upon registration, link sent via email to confirm registration
+1) Upon registration, link sent via email to confirm registration
 
 3) Configurable expiration for that registration link
 

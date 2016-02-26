@@ -18,6 +18,99 @@ expiration.one_day = 24 * expiration.one_hour;
 expiration.one_week = 7 * expiration.one_day;
 
 
+
+//brute force handling
+
+require('connect-flash');
+var ExpressBrute = require('express-brute'),
+    MemcachedStore = require('express-brute-memcached'),
+    moment = require('moment'),
+    store;
+
+if (env == 'development'){
+  store = new ExpressBrute.MemoryStore(); // stores state locally, don't use this in production
+} else {
+  // stores state with memcached
+  store = new MemcachedStore(['127.0.0.1'], {
+    prefix: 'NoConflicts'
+  });
+}
+var failCallback = function (req, res, next, nextValidRequestDate) {
+  req.flash('error', "You've made too many failed attempts in a short period of time, please try again "+moment(nextValidRequestDate).fromNow());
+  res.redirect('/login'); // brute force protection triggered, send them back to the login page
+};
+var handleStoreError = function (error) {
+  log.error(error); // log this error so we can figure out what went wrong
+  // cause node to exit, hopefully restarting the process fixes the problemc
+  throw {
+    message: error.message,
+    parent: error.parent
+  };
+};
+// Start slowing requests after 5 failed attempts to do something for the same user
+var userBruteforce = new ExpressBrute(store, {
+  freeRetries: 5,
+  proxyDepth: 1,
+  minWait: 5*60*1000, // 5 minutes
+  maxWait: 60*60*1000, // 1 hour,
+  failCallback: failCallback,
+  handleStoreError: handleStoreError
+
+});
+
+// No more than 1000 login attempts per day per IP
+var globalBruteforce = new ExpressBrute(store, {
+  freeRetries: 1000,
+  proxyDepth: 1,
+  attachResetToRequest: false,
+  refreshTimeoutOnRequest: false,
+  minWait: 25*60*60*1000, // 1 day 1 hour (should never reach this wait time)
+  maxWait: 25*60*60*1000, // 1 day 1 hour (should never reach this wait time)
+  lifetime: 24*60*60, // 1 day (seconds not milliseconds)
+  failCallback: failCallback
+  //,
+  //handleStoreError: handleStoreError
+});
+
+
+router.post('/login', globalBruteforce.prevent,
+    userBruteforce.getMiddleware({key: function(req, res, next) {
+      // prevent too many attempts for the same username
+
+      next(req.body.username);}}), function(req, res, next){
+
+
+      if(!req.body.username || !req.body.password){
+        return res.status(400).json({message: 'Please fill out all fields'});
+      }
+
+
+      passport.authenticate('local', function(err, user, info){
+        if(err){ return next(err); }
+
+        if(user){
+          if(user.enabled === false)
+            return res.status(400).json({message: 'not approved yet'});
+          else{
+
+            //login good
+            req.brute.reset(function () {
+              return res.json({token: user.generateJWT()});
+            });
+
+
+
+          }
+
+
+
+        } else {
+          return res.status(401).json(info.message);
+        }
+      })(req, res, next);
+    });
+
+
 /* GET home page. */
 router.get('/', function(req, res, next) {
   res.render('index');
@@ -196,28 +289,6 @@ router.get('/check_username/:u', function(req, res, next) {
   })
 });
 
-router.post('/login', function(req, res, next){
-
-
-  if(!req.body.username || !req.body.password){
-    return res.status(400).json({message: 'Please fill out all fields'});
-  }
-
-  passport.authenticate('local', function(err, user, info){
-    if(err){ return next(err); }
-
-    if(user){
-      if(user.enabled === false)
-        return res.status(400).json({message: 'not approved yet'});
-      else
-        return res.json({token: user.generateJWT()});
-
-
-    } else {
-      return res.status(401).json(info.message);
-    }
-  })(req, res, next);
-});
 
 router.post('/enable_account/:key', function(req, res, next) {
     var key = req.params.key;
@@ -263,7 +334,7 @@ router.post('/enable_account/:key', function(req, res, next) {
 })
 
 
-router.post('/register', function(req, res, next){
+router.post('/register',  function(req, res, next){
 
 
   if(!req.body.username || !req.body.password|| !req.body.email){
@@ -279,6 +350,7 @@ router.post('/register', function(req, res, next){
   var user = new User();
   user.username = req.body.username.toLowerCase();
   user.approval_link =random_string;
+
   user.email = req.body.email.toLowerCase();
 
   user.approval_expiration = (!Date.now)?  new Date().getTime(): Date.now();

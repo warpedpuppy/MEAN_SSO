@@ -21,6 +21,8 @@ Second, I've added a bunch of features:
 
 9) Admin section with change email & password
 
+10) Creation of sub-groups
+
 10) and I'm sure others that I'm not thinking of right now. . .
 
 

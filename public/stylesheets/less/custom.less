@@ -1,0 +1,186 @@
+
+@import (reference) 'bootstrap_less/bootstrap.less';
+
+
+#essay-wrapper {
+
+  .make-xs-column(10);
+  .make-xs-column-offset(1);
+  .make-sm-column(10);
+  .make-sm-column-offset(1);
+
+
+}
+.form-width {
+
+  .make-xs-column(8);
+  .make-xs-column-offset(2);
+  .make-sm-column(6);
+  .make-sm-column-offset(3);
+  .make-md-column(6);
+  .make-md-column-offset(3);
+
+}
+#media-wrapper {
+
+  .make-xs-column(10);
+  .make-xs-column-offset(1);
+  .make-sm-column(10);
+  .make-sm-column-offset(1);
+
+
+}
+
+.screen-color {
+  @media screen {
+    color: green;
+    @media (min-width: 768px) {
+      color: red;
+    }
+  }
+  @media tv {
+    color: black;
+  }
+}
+
+
+body {
+  background-color:antiquewhite;
+}
+
+
+.mini-form{
+  margin:0px;
+  padding:0px;
+  font-style: italic;
+  text-align: right;
+}
+.reg_form_input {
+  margin-bottom: 0px;
+}
+
+.green {
+  color:#66CD00;
+}
+
+.orange {
+  color:#FF9900;
+}
+
+
+
+.pin {
+  fill:red;
+}
+
+#bar_chart {
+  text-align:center
+
+}
+#chart_bubble_test {
+  text-align:left
+
+}
+
+
+.essay-header {
+
+  padding:0px;
+}
+.essay-title {
+  margin:0px;
+  padding:0px;
+  text-decoration: none;
+
+}
+.essay-date {
+  text-align:right;
+  font-size: 12px;
+  margin: 0px;
+  padding: 0px;
+  position:absolute;
+  bottom:0px;
+  right:0px;
+}
+.essay-format {
+
+  margin:10px auto;
+  background-color: #f5f5f5;
+  border:1px solid #cccccc;
+  padding:10px;
+
+}
+.b {
+  border:1px solid #000000;
+}
+.add-comment-text {
+  margin: 10px 0px 0px 0px;
+  padding: 0px;
+}
+
+.comment-div {
+  background-color: #f5f5f5;
+  border:1px solid #cccccc;
+  padding:0px;
+  margin:5px auto;
+}
+.comment-header {
+  border-bottom: 1px solid #999999;
+  margin:0px;
+}
+.comment-body {
+  margin:0px;
+}
+.response-div {
+  margin:0px 0px 20px;
+  border-top:1px solid #999999;
+
+}
+
+.bottom-buffer {
+  height: 100px;
+}
+
+
+
+
+.tooltip {
+  position: absolute;
+  top: 100px;
+  left: 100px;
+  -moz-border-radius:5px;
+  border-radius: 5px;
+  border: 2px solid #000;
+  /* background: #222222; */
+  background: #fff;
+  opacity: .9;
+  /* color: #eeeeee; */
+  color: black;
+  padding: 10px;
+  width: 300px;
+  font-size: 12px;
+  z-index: 10;
+}
+
+.tooltip .title {
+  font-size: 13px;
+}
+
+.tooltip .name {
+  font-weight:bold;
+}
+
+.top-buffer {
+  margin-top:20px;
+}
+
+.default{
+  opacity: 0;
+
+}
+
+.fade{
+  -webkit-transition: opacity 0.5s; /* For Safari 3.1 to 6.0 */
+  transition: opacity 0.5s;
+  opacity: 1;
+}

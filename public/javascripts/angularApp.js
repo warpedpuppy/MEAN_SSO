@@ -2,7 +2,7 @@
  * Created by edwardwalther on 2/4/16.
  */
 
-var app = angular.module('authentication_app', ['ui.router']);
+var app = angular.module('authentication_app', ['ui.router','vcRecaptcha']);
 
 app.filter('capitalize', function() {
     return function(input, all) {
@@ -34,7 +34,7 @@ app.controller('NavCtrl', ['$scope', 'auth', '$http', function($scope, auth, $ht
 
 app.controller('MembersCtrl',['$scope', 'auth', '$http', function($scope,auth,$http){
 
-            $http.get("/members",{
+            $http.get("/teams",{
                 headers: {Authorization: 'Bearer '+auth.getToken()}
             }).success(function(data){
             $scope.members = data;
@@ -44,9 +44,65 @@ app.controller('MembersCtrl',['$scope', 'auth', '$http', function($scope,auth,$h
     }]);
 
 app.controller('AdminCtrl',['$scope', 'auth','$http', function($scope,auth,$http){
+
+        $scope.active_tab = 1;
+        $scope.add_group_member_show = false;
         $scope.change_password_show = true;
         $scope.error = false;
         $scope.show_success = false;
+
+        $scope.toggleVisibility = function(model) {
+            $scope.selected = ($scope.selected === undefined)?model:undefined;
+        };
+        $scope.isVisible = function(model) {
+            return $scope.selected === model;
+        };
+
+        $http.get("/members",{
+            headers: {Authorization: 'Bearer '+auth.getToken()}
+        }).success(function(data){
+            console.log(data)
+            $scope.members = data;
+        })
+
+        $scope.deleteMember = function(id){
+            alert(id)
+
+            $http.get("/delete_member/"+id,{
+                headers: {Authorization: 'Bearer '+auth.getToken()}
+            }).success(function(data){
+                console.log(data)
+
+
+
+            })
+            }
+
+        $scope.addGroupMember = function(){
+            var new_member = {};
+            new_member.groupname = auth.currentUser();
+            new_member.new_member_name = $scope.new_member_name;
+            new_member.new_member_email= $scope.new_member_email;
+
+
+
+            $http.post("/add_new_member/", new_member,{
+                headers: {Authorization: 'Bearer '+auth.getToken()}
+            }).then(function(response) {
+
+                if(response.data.member_added === true){
+                    $scope.new_member_name = "";
+                    $scope.new_member_email = "";
+                    $scope.success = "New member added!";
+                    $scope.show_success = true;
+                }
+                else{
+                    $scope.error = true;
+                    $scope.warning = "there was a problem, please try again."
+                }
+            });
+
+        }
 
         $scope.changePassword  = function(){
             var passwords = {};
@@ -55,7 +111,7 @@ app.controller('AdminCtrl',['$scope', 'auth','$http', function($scope,auth,$http
             passwords.new_password_2 = $scope.new_password_2;
 
             if(passwords.new_password_1 !== passwords.new_password_2){
-                alert(passwords.new_password_1+" "+passwords.new_password_2)
+                //alert(passwords.new_password_1+" "+passwords.new_password_2)
                 $scope.error = true;
                 $scope.warning = "passwords don't match";
 
@@ -182,7 +238,7 @@ app.controller('EnableCtrl',['$scope', 'info', 'auth', function($scope,info,auth
 
 app.controller('PendingCtrl',['$scope', function($scope){}]);
 
-app.controller('AuthCtrl', ['$scope', '$state', 'auth', 'info', 'hermes', function($scope, $state, auth, info,hermes){
+app.controller('AuthCtrl', ['$scope', '$state', 'auth', 'info', 'hermes', '$http',function($scope, $state, auth, info,hermes,$http){
 
             if(hermes.message == 'updated'){
                 $scope.show_success = true;
@@ -213,7 +269,79 @@ app.controller('AuthCtrl', ['$scope', '$state', 'auth', 'info', 'hermes', functi
                 $state.go("forgot_password")
             }
 
+
+    //console.log("this is your app's controller");
+    $scope.response = null;
+    $scope.widgetId = null;
+    $scope.model = {
+        key: '6LdCVRkTAAAAAI2pzm1AMpyLtH9Zav7shUK6cukD'
+    };
+    $scope.setResponse = function (response) {
+        //console.info('Response available');
+        $scope.response = response;
+    };
+    $scope.setWidgetId = function (widgetId) {
+        //console.info('Created widget ID: %s', widgetId);
+        $scope.widgetId = widgetId;
+    };
+    $scope.cbExpiration = function() {
+        //console.info('Captcha expired. Resetting response object');
+        vcRecaptchaService.reload($scope.widgetId);
+        $scope.response = null;
+    };
+    //$.getScript("https://www.google.com/recaptcha/api.js");
+    $scope.submit = function () {
+        var valid;
+
+        /**
+         * SERVER SIDE VALIDATION
+         *
+         * You need to implement your server side validation here.
+         * Send the reCaptcha response to the server and use some of the server side APIs to validate it
+         * See https://developers.google.com/recaptcha/docs/verify
+         */
+        //console.log('sending the captcha response to the server', $scope.response);
+       // console.log($scope.myFields.myRecaptchaResponse);
+       // console.log($scope.response);
+        $scope.user.response = $scope.response
+        $http.post('/register_test', $scope.user).success(function(data){
+
+            var string = "";
+            for(var key in data){
+                if(data[key].toString() !== "[object Object]")
+                    string += key+") "+data[key]+"   \n";
+                else{
+                    for(var key2 in data[key]){
+                        string += key2+") "+data[key][key2]+"   \n";
+                    }
+                }
+
+            }
+
+            $scope.response = data;
+
+        });
+
+       /* if ($http.post('/register_test', $scope.response)) {
+            console.log('Success');
+        } else {
+            console.log('Failed validation');
+
+            // In case of a failed validation you need to reload the captcha
+            // because each response can be checked just once
+            vcRecaptchaService.reload($scope.widgetId);
+        }*/
+    };
+
+
+
+
             $scope.register = function(){
+
+                $scope.user.response = $scope.response
+               //console.log($scope.response);
+                //console.log("recaptcha_response_field = "+$scope.recaptcha_response_field);
+
 
                 var proceed = true;
                 for(var key in $scope.user){
@@ -258,11 +386,6 @@ app.directive('username',['$http','info',"$q",function($http, info, $q) {
         }
     };
 }]);
-
-
-
-
-
 app.factory('info', ['$http', '$location','auth',"$state", "hermes",function($http,$location,auth,$state,hermes){
     var o = {
         info:[]
@@ -289,8 +412,6 @@ app.factory('info', ['$http', '$location','auth',"$state", "hermes",function($ht
     }
     return o;
 }])
-
-
 app.factory('hermes', ['$http', '$window',  '$state', function($http, $window, $state) {
 
     var hermes = {};

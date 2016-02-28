@@ -3,12 +3,17 @@ var router = express.Router();
 var passport = require('passport');
 var mongoose = require('mongoose');
 var User = mongoose.model('User');
+var Member = mongoose.model('Member');
 var jwt = require('express-jwt');
 var nodemailer = require('nodemailer');
 var crypto = require('crypto');
 var env       = process.env.NODE_ENV || "development";
 var config    = require(__dirname + '/../config/config.json')[env];
 var auth = jwt({secret:process.env[config.secret_var_name], userProperty: 'payload'});
+
+var Recaptcha = require('recaptcha').Recaptcha;
+var PUBLIC_KEY  = config.recaptcha_public_key;
+var PRIVATE_KEY = config.recaptcha_secret_key;
 
 var expiration = {};
 expiration.one_second = 1000;
@@ -20,7 +25,6 @@ expiration.one_week = 7 * expiration.one_day;
 
 
 //brute force handling
-
 require('connect-flash');
 var ExpressBrute = require('express-brute'),
     MemcachedStore = require('express-brute-memcached'),
@@ -113,6 +117,10 @@ router.post('/login', globalBruteforce.prevent,
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
+
+  var recaptcha = new Recaptcha(PUBLIC_KEY, PRIVATE_KEY);
+
+
   res.render('index');
 });
 
@@ -126,9 +134,40 @@ router.post('/empty_dbs',function(req, res, next) {
 
 });
 
-
-
 router.get('/members',auth,function(req, res, next) {
+
+  Member.find({}, function(err, docs) {
+    if (!err){
+      res.json(docs);
+    } else {throw err;}
+  })
+
+
+});
+
+
+router.get('/delete_member/:d', function(req, res) {
+  var member_to_delete = req.params.d;
+  console.log("member to delete = "+member_to_delete);
+
+
+  //not working
+  Member.find({ id:member_to_delete }).remove(function(err, removed){
+
+    console.log("removed = "+removed)
+  });
+/*
+
+  Member.remove({ id:member_to_delete }, function(err, removed){
+
+    console.log("removed = "+removed)
+  });
+*/
+
+
+});
+
+router.get('/teams',auth,function(req, res, next) {
 
   User.find({}, function(err, docs) {
     if (!err){
@@ -174,6 +213,32 @@ router.get('/send_reset_link/:u', function(req, res, next) {
 
 });
 
+
+
+router.post('/add_new_member/',auth,function(req, res, next) {
+
+
+
+  var groupname = req.body.groupname;
+  var new_member_name = req.body.new_member_name;
+  var new_member_email = req.body.new_member_email;
+
+
+  //this a call to the db
+  var member = new Member();
+
+  member.groupname = groupname;
+  member.membername = new_member_name;
+  member.email = new_member_email;
+console.log(member)
+  member.save(function (err){
+    if(err){ return next(err); }
+
+
+    return res.json({member_added:true});
+  });
+
+});
 
 
 
@@ -337,35 +402,61 @@ router.post('/enable_account/:key', function(req, res, next) {
 router.post('/register',  function(req, res, next){
 
 
-  if(!req.body.username || !req.body.password|| !req.body.email){
-    return res.status(400).json({message: 'Please fill out all fields'});
-  }
+  var captchaResponse = req.body.response;
 
-  var random_string = randomString(32, '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ');
-  var text = config.site_root+"/#/enable_account?key="+random_string;
-  var htmlText = '<a href="'+text+'">'+text+'</a>';
+  var formData = {
+    secret: PRIVATE_KEY,
+    response: captchaResponse
+  };
+  var request = require('request');
+  request.post({url:'https://www.google.com/recaptcha/api/siteverify', formData: formData}, function optionalCallback(err, httpResponse, body) {
 
-  send_email(req.body.email, text,htmlText);
+    var results = JSON.parse(body);
+    //console.log(results);
+    //console.log(results.success);
 
-  var user = new User();
-  user.username = req.body.username.toLowerCase();
-  user.approval_link =random_string;
+    if (err) {
+      return console.error('upload failed:', err);
+    }
+    else if(results.success === true)
+    {
 
-  user.email = req.body.email.toLowerCase();
 
-  user.approval_expiration = (!Date.now)?  new Date().getTime(): Date.now();
 
-  user.setPassword(req.body.password)
+      if (!req.body.username || !req.body.password || !req.body.email) {
+        return res.status(400).json({message: 'Please fill out all fields'});
+      }
 
-  user.save(function (err){
-    if(err){ return next(err); }
+      var random_string = randomString(32, '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ');
+      var text = config.site_root + "/#/enable_account?key=" + random_string;
+      var htmlText = '<a href="' + text + '">' + text + '</a>';
 
-    //changing this -- now must click link
-    //return res.json({token: user.generateJWT()})
+      send_email(req.body.email, text, htmlText);
 
-    return res.json({approval:"pending"});
+      var user = new User();
+      user.username = req.body.username.toLowerCase();
+      user.approval_link = random_string;
+
+      user.email = req.body.email.toLowerCase();
+
+      user.approval_expiration = (!Date.now) ? new Date().getTime() : Date.now();
+
+      user.setPassword(req.body.password)
+
+      user.save(function (err) {
+        if (err) {
+          return next(err);
+        }
+
+        //changing this -- now must click link
+        //return res.json({token: user.generateJWT()})
+        //console.log('Upload successful!  Server responded with:', body);
+        return res.json({approval: "pending"});
+      });
+
+    }
+    //console.log('Upload successful!  Server responded with:', body);
   });
-
 
 });
 
@@ -389,22 +480,6 @@ router.post('/enabled_get_token', function(req, res, next){
     return res.status(400).json({message: 'Please fill out all fields'});
   }
 
-  //this a call to the db
-  var user = new User();
-
-  user.username = req.body.username;
-  user.approval_link =random_string;
-
-  user.setPassword(req.body.password)
-
-  user.save(function (err){
-    if(err){ return next(err); }
-
-    //changing this -- now must click link
-    //return res.json({token: user.generateJWT()})
-
-    return res.json({approval:"pending"});
-  });
 
 
 });

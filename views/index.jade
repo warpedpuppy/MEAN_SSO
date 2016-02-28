@@ -2,9 +2,8 @@ extends layout
 
 block content
 
-
-  .row
-    .col-md-6.col-md-offset-3.col-sm-8.col-sm-offset-2.col-xs-8.col-xs-offset-2
+  .container
+    .row
       ui-view
 
 
@@ -19,16 +18,49 @@ block content
 
     .row.text-center
         ul.pagination
-          li(ng-class="{active: change_password_show}")
-            a(ng-click="change_password_show = true") change password
-          li(ng-class="{active: !change_password_show}")
-            a(ng-click="change_password_show = false") change email address
+          li(ng-class="{active: active_tab == 1}")
+            a(ng-click="active_tab = 1") add group member
+          li(ng-class="{active: active_tab == 2}")
+            a(ng-click="active_tab = 2") change password
+          li(ng-class="{active: active_tab == 3}")
+            a(ng-click="active_tab = 3") change email address
+          li(ng-class="{active: active_tab == 4}")
+            a(ng-click="active_tab = 4") delete/edit group members
 
-    .row
+    .row.form-width
       div(ng-show='error' class='alert alert-warning row') {{warning}}
       div(ng-show='show_success' class='alert alert-success row') {{success}}
-    .row
-      form(ng-submit="changePassword()", name="change_password", ng-show="change_password_show")
+
+
+    .row.form-width
+      form(ng-submit="addGroupMember()", name="add_group_member", ng-show="active_tab == 1")
+        h3 add a group member
+
+        .form-group
+          input(id='member_name', type="text",class="form-control",name="member_name",placeholder="member name",ng-model="new_member_name",ng-pattern="/^[a-zA-Z0-9]*$/",ng-minlength="3",ng-maxlength='20', member_name required)/
+
+        .form-group
+          p(class='mini-form' ng-class="add_group_member.member_name.$valid === false?'orange':'green'") format valid? =
+            code(ng-class="add_group_member.member_name.$valid === false?'orange':'green'") {{add_group_member.member_name.$valid}}
+
+        .form-group
+          input(id='member_email', type="email",class="form-control",name="member_email",placeholder="new member's email",ng-model="new_member_email" new_member_email required)/
+
+        .form-group
+          p(class='mini-form' ng-class="add_group_member.member_email.$valid === false?'orange':'green'") format valid? =
+            code(ng-class="add_group_member.member_email.$valid === false?'orange':'green'") {{add_group_member.member_email.$valid}}
+
+        .form-group
+          button(type="submit" class="btn btn-primary",ng-disabled="add_group_member.$invalid") add member
+
+
+
+
+
+
+
+    .row.form-width
+      form(ng-submit="changePassword()", name="change_password", ng-show="active_tab == 2")
         h3 change your password
 
         .form-group
@@ -50,13 +82,14 @@ block content
           p(class='mini-form orange',id='password_lowercase_check') passwords must have at least one lowercase
           p(class='mini-form orange',id='password_number_check') passwords must have at least one number
 
-
+            //.row.form-width
+              form(ng-submit="addGroupMember()", name="add_group_member", ng-show="active_tab == 1")
         .form-group
           button(type="submit" class="btn btn-primary",ng-disabled="change_password.$invalid") change password
 
 
-
-      form(ng-submit="changeEmail()", name="change_email", ng-hide="change_password_show")
+    .row.form-width
+      form(ng-submit="changeEmail()", name="change_email", ng-show="active_tab == 3")
         h3 change your email address
 
         .form-group
@@ -66,7 +99,6 @@ block content
           p(class='mini-form' ng-class="change_email.email1.$valid === false?'orange':'green'") format valid? =
             code(ng-class="change_email.email1.$valid === false?'orange':'green'") {{change_email.email1.$valid}}
 
-
         .form-group
           input(id='email_input_2', type="email",class="form-control",name="email2",placeholder="Re-type new email",ng-model="new_email_2" required)/
 
@@ -74,9 +106,33 @@ block content
           p(class='mini-form' ng-class="change_email.email2.$valid === false?'orange':'green'") format valid? =
             code(ng-class="change_email.email2.$valid === false?'orange':'green'") {{change_email.email2.$valid}}
 
-
         .form-group
           button(type="submit" class="btn btn-primary",ng-disabled="change_email.$invalid") change email
+
+
+    .row.form-width
+      form(ng-submit="deleteEditMembers()", name="delete_edit_members", ng-show="active_tab == 4")
+          table.table.table-striped
+            thead
+              tr
+                th name
+                th email
+                th edit
+                th delete
+            tbody
+              tr(ng-repeat='member in members')
+                td {{member.membername}}
+                td {{member.email}}
+                td
+                  button(class="btn btn-info") edit
+                td
+                  button(class="btn btn-danger", ng-click='deleteMember(member._id)',  ng-show='isVisible(member)') confirm deletion
+
+                  button(ng-click='toggleVisibility(member)', class='btn btn-success', ng-show='isVisible(member)') cancel deletion
+
+                  button(ng-click='toggleVisibility(member)', class='btn btn-primary', ng-hide='isVisible(member)') delete this record
+
+
 
 
 
@@ -178,57 +234,66 @@ block content
         h1(ng-show="isLoggedIn()") Welcome home, {{ currentUser() | capitalize }}!
         h1(ng-hide="isLoggedIn()") you are not logged in.
 
+
+
+
+
   script(type="text/ng-template" id="/register.html")
 
-
-
-    .page-header
+    .form-width
       div(ng-show="error" class="alert alert-danger row")
-        span {{ expired_notice }}
+          span {{ expired_notice }}
 
-    div(ng-show="show_error" class="alert alert-danger row")
-      span {{ error_message }}
-
-    form(ng-submit="register()",style="margin-top:30px;", name="register_form")
-
-      h3 Register
+      div(ng-show="show_error" class="alert alert-danger row")
+        span {{ error_message }}
 
 
+      form(ng-submit="register(user)",style="margin-top:30px;", name="register_form")
 
 
-      .form-group
-        input(id='username_input',ng-pattern="/^[a-zA-Z0-9]*$/",ng-minlength="3",ng-maxlength='20',type="text",class="form-control",placeholder="Username", name='username',ng-model="user.username" username required)/
+        h3 Register
+        .form-group
+          input(id='username_input',ng-pattern="/^[a-zA-Z0-9]*$/",ng-minlength="3",ng-maxlength='20',type="text",class="form-control",placeholder="Username", name='username',ng-model="user.username" username required)/
 
 
-      .form-group
-        div(ng-if="register_form.$pending.usernameExists") checking....
-        div(ng-if="register_form.$error.usernameExists") username exists already
-        p(class='mini-form' ng-class="register_form.username.$valid === false?'orange':'green'") input valid? =
-          code(ng-class="register_form.username.$valid === false?'orange':'green'") {{register_form.username.$valid}}
-        p(class='mini-form orange',id='username_string_length')  >= 3 chars & <=20
-        p(class='mini-form orange',id='username_char_check') only digits and letters, please
+        .form-group
+          div(ng-if="register_form.$pending.usernameExists") checking....
+          div(ng-if="register_form.$error.usernameExists") username exists already
+          p(class='mini-form' ng-class="register_form.username.$valid === false?'orange':'green'") input valid? =
+            code(ng-class="register_form.username.$valid === false?'orange':'green'") {{register_form.username.$valid}}
+          p(class='mini-form orange',id='username_string_length')  >= 3 chars & <=20
+          p(class='mini-form orange',id='username_char_check') only digits and letters, please
 
 
 
-      div(class='form-group reg_form_input')
-        input(autocomplete="off",class='email_reg_form', type="email",class="form-control",placeholder="Email address",name="email",ng-model="user.email" required)/
+        div(class='form-group reg_form_input')
+          input(autocomplete="off",class='email_reg_form', type="email",class="form-control",placeholder="Email address",name="email",ng-model="user.email" required)/
 
-      .form-group
-        p(class='mini-form' ng-class="register_form.email.$valid === false?'orange':'green'") input valid? =
-          code(ng-class="register_form.email.$valid === false?'orange':'green'") {{register_form.email.$valid}}
+        .form-group
+          p(class='mini-form' ng-class="register_form.email.$valid === false?'orange':'green'") input valid? =
+            code(ng-class="register_form.email.$valid === false?'orange':'green'") {{register_form.email.$valid}}
 
-      .form-group(class='form-group reg_form_input')
-        input(id='password_input', type="password",class="form-control",name="password",placeholder="Password",ng-model="user.password",ng-pattern="/(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])/",ng-minlength="6",ng-maxlength='20' password required)/
+        .form-group(class='form-group reg_form_input')
+          input(id='password_input', type="password",class="form-control",name="password",placeholder="Password",ng-model="user.password",ng-pattern="/(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])/",ng-minlength="6",ng-maxlength='20' password required)/
 
-      .form-group
-        p(class='mini-form' ng-class="register_form.password.$valid === false?'orange':'green'") input valid? =
-          code(ng-class="register_form.password.$valid === false?'orange':'green'") {{register_form.password.$valid}}
-        p(class='mini-form orange',id='password_length_check') passwords must be >= 6 chars & <=20
-        p(class='mini-form orange',id='password_uppercase_check') passwords must have at least one uppercase
-        p(class='mini-form orange',id='password_lowercase_check') passwords must have at least one lowercase
-        p(class='mini-form orange',id='password_number_check') passwords must have at least one number
+        .form-group
+          p(class='mini-form' ng-class="register_form.password.$valid === false?'orange':'green'") input valid? =
+            code(ng-class="register_form.password.$valid === false?'orange':'green'") {{register_form.password.$valid}}
+          p(class='mini-form orange',id='password_length_check') passwords must be >= 6 chars & <=20
+          p(class='mini-form orange',id='password_uppercase_check') passwords must have at least one uppercase
+          p(class='mini-form orange',id='password_lowercase_check') passwords must have at least one lowercase
+          p(class='mini-form orange',id='password_number_check') passwords must have at least one number
 
-      button(type="submit" class="btn btn-primary",ng-disabled="register_form.$invalid") Register
+        .form-group
+          div( vc-recaptcha, class='g-recaptcha',theme="'light'", key="model.key",on-create="setWidgetId(widgetId)",on-success="setResponse(response)", on-expire="cbExpiration()", ng-model="myFields.myRecaptchaResponse")
+
+        .form-group
+          button(type="submit" class="btn btn-primary",ng-disabled="register_form.$invalid") Register
+
+        //.form-group
+          div(ng-model='response') {{response}}
+
+        div(style='height:500px;')
 
 
 
@@ -244,27 +309,29 @@ block content
 
   script(type="text/ng-template" id="/login.html")
 
-    .page-header
+    .form-width
+      div(ng-show="show_success" class="alert alert-success row")
+        span {{ success_message }}
 
-    div(ng-show="show_success" class="alert alert-success row")
-      span {{ success_message }}
+      div(ng-show="show_error" class="alert alert-danger row")
+        span {{ error_message }}
 
-    div(ng-show="show_error" class="alert alert-danger row")
-      span {{ error_message }}
+      form(name="login_form", ng-submit="logIn()",style="margin-top:30px;")
+        h3 Log In
 
-    form(name="login_form", ng-submit="logIn()",style="margin-top:30px;")
-      h3 Log In
+        .form-group
+          input(type="text", class="form-control",placeholder="Username",value='test_user',ng-model="user.username",ng-pattern="/^[a-zA-Z0-9]*$/",ng-minlength="3",ng-maxlength='20', required)/
+
+
+        .form-group
+          input(type="password",class="form-control",placeholder="Password",ng-model="user.password",ng-pattern="/(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])/",ng-minlength="6",ng-maxlength='20' required)/
+
+        .form-group
+          button(type="submit" class="btn btn-primary",ng-disabled="login_form.$invalid") Log In
 
       .form-group
-        input(type="text", class="form-control",placeholder="Username",value='test_user',ng-model="user.username",ng-pattern="/^[a-zA-Z0-9]*$/",ng-minlength="3",ng-maxlength='20', required)/
-
-
-      .form-group
-        input(type="password",class="form-control",placeholder="Password",ng-model="user.password",ng-pattern="/(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])/",ng-minlength="6",ng-maxlength='20' required)/
+        button(ng-click="forgotPassword()", class="btn btn-default") forgot passsword?
 
       .form-group
-        button(type="submit" class="btn btn-primary",ng-disabled="login_form.$invalid") Log In
-
-    .form-group
-      button(ng-click="forgotPassword()", class="btn btn-default") forgot passsword?
+        button(ng-click="bruteForce()", class="btn btn-danger") test brute force!
 

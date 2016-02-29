@@ -1,11 +1,11 @@
 ********************
-Welcome!  This is very much a work in progress.
+Welcome!  This is very much a work in progress & some serious clean up is required.  That said -- regular progress is being made.
 
-First, I started with the login/registration/authentication from this tutorial: https://thinkster.io/mean-stack-tutorial#adding-some-style
+features:
 
-Second, I've added a bunch of features:
+1) login, registration, forgot password, change email, change password
 
-1) Upon registration, link sent via email to confirm registration
+2) Upon registration, link sent via email to confirm registration
 
 3) Configurable expiration for that registration link
 
@@ -21,18 +21,16 @@ Second, I've added a bunch of features:
 
 9) Admin section with change email & password
 
-10) Creation of sub-groups
+10) brute force attack protection
 
-10) and I'm sure others that I'm not thinking of right now. . .
+11) google recaptcha handling
 
+12) brute force check
 
-to be added:
+13) sub group members created
 
-1) captcha
+14) LESS
 
-2) customized security features -- gettin' creative with it
-
-3) extremely cool other stuff
 
 
 

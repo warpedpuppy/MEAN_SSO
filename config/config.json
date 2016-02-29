@@ -10,7 +10,7 @@
     "authentication_expiration":"one_week",
     "reset_password_expiration":"one_hour",
     "expiration_choices":"one_second, one_minute, one_hour, one_day, one_week",
-    "secret_var_name": "secret_var_name",
+    "secret_var_name": "",
     "recaptcha_secret_key":"",
     "recaptcha_public_key":"",
     "email_port":465
@@ -24,7 +24,7 @@
     "authentication_expiration":"one_week",
     "reset_password_expiration":"one_hour",
     "expiration_choices":"one_second, one_minute, one_hour, one_day, one_week",
-    "secret_var_name": "secret_var_name",
+    "secret_var_name": "",
     "recaptcha_secret_key":"",
     "recaptcha_public_key":"",
     "email_port":465
@@ -38,7 +38,7 @@
     "authentication_expiration":"one_week",
     "reset_password_expiration":"one_hour",
     "expiration_choices":"one_second, one_minute, one_hour, one_day, one_week",
-    "secret_var_name": "secret_var_name",
+    "secret_var_name": "",
     "recaptcha_secret_key":"",
     "recaptcha_public_key":"",
     "email_port":465

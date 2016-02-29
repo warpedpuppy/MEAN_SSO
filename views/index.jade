@@ -35,13 +35,16 @@ block content
     .row.form-width
       form(ng-submit="addGroupMember()", name="add_group_member", ng-show="active_tab == 1")
         h3 add a group member
+          //,ng-pattern="/^[a-zA-Z0-9]*$/",ng-minlength="3",ng-maxlength='20',
+        .form-group
+          input(id='membername', type="text",class="form-control",name="membername",placeholder="member name", ng-model="new_member_name" membername required)/
 
         .form-group
-          input(id='member_name', type="text",class="form-control",name="member_name",placeholder="member name",ng-model="new_member_name",ng-pattern="/^[a-zA-Z0-9]*$/",ng-minlength="3",ng-maxlength='20', member_name required)/
+          div(ng-if="add_group_member.$pending.membernameExists") checking....
+          div(ng-if="add_group_member.$error.membernameExists") membername exists already
 
-        .form-group
-          p(class='mini-form' ng-class="add_group_member.member_name.$valid === false?'orange':'green'") format valid? =
-            code(ng-class="add_group_member.member_name.$valid === false?'orange':'green'") {{add_group_member.member_name.$valid}}
+          p(class='mini-form' ng-class="add_group_member.membername.$valid === false?'orange':'green'") format valid? =
+            code(ng-class="add_group_member.membername.$valid === false?'orange':'green'") {{add_group_member.membername.$valid}}
 
         .form-group
           input(id='member_email', type="email",class="form-control",name="member_email",placeholder="new member's email",ng-model="new_member_email" new_member_email required)/
@@ -126,7 +129,7 @@ block content
                 td
                   button(class="btn btn-info") edit
                 td
-                  button(class="btn btn-danger", ng-click='deleteMember(member._id)',  ng-show='isVisible(member)') confirm deletion
+                  button(class="btn btn-danger", ng-click='deleteMember(member._id, $index)',  ng-show='isVisible(member)') confirm deletion
 
                   button(ng-click='toggleVisibility(member)', class='btn btn-success', ng-show='isVisible(member)') cancel deletion
 

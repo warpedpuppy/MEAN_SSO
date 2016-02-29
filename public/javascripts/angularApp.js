@@ -61,18 +61,18 @@ app.controller('AdminCtrl',['$scope', 'auth','$http', function($scope,auth,$http
         $http.get("/members",{
             headers: {Authorization: 'Bearer '+auth.getToken()}
         }).success(function(data){
-            console.log(data)
+            //console.log(data)
             $scope.members = data;
         })
 
-        $scope.deleteMember = function(id){
-            alert(id)
+        $scope.deleteMember = function(id, $index){
+
 
             $http.get("/delete_member/"+id,{
                 headers: {Authorization: 'Bearer '+auth.getToken()}
             }).success(function(data){
-                console.log(data)
-
+               // console.log(data+" "+$index)
+                $scope.members.splice($index, 1);
 
 
             })
@@ -91,10 +91,17 @@ app.controller('AdminCtrl',['$scope', 'auth','$http', function($scope,auth,$http
             }).then(function(response) {
 
                 if(response.data.member_added === true){
+
+                    var nm = {};
+                    nm.membername = new_member.new_member_name;
+                    nm.email = new_member.new_member_email;
+                    $scope.members.push(nm);
+
                     $scope.new_member_name = "";
                     $scope.new_member_email = "";
                     $scope.success = "New member added!";
                     $scope.show_success = true;
+
                 }
                 else{
                     $scope.error = true;
@@ -269,13 +276,28 @@ app.controller('AuthCtrl', ['$scope', '$state', 'auth', 'info', 'hermes', '$http
                 $state.go("forgot_password")
             }
 
+    $scope.bruteForce = function(){
+
+        for(var i = 0; i < 100; i ++){
+            $scope.user.username = "abels";
+            $scope.user.password = "Tugtugtug3";
+            $scope.logIn();
+        }
+
+
+
+    }
 
     //console.log("this is your app's controller");
     $scope.response = null;
     $scope.widgetId = null;
-    $scope.model = {
-        key: '6LdCVRkTAAAAAI2pzm1AMpyLtH9Zav7shUK6cukD'
-    };
+
+    $scope.model = {};
+    $http.get("/get_public_key").success(function(data){
+        $scope.model.key = data.PUBLIC_KEY;
+
+    })
+
     $scope.setResponse = function (response) {
         //console.info('Response available');
         $scope.response = response;
@@ -356,7 +378,7 @@ app.controller('AuthCtrl', ['$scope', '$state', 'auth', 'info', 'hermes', '$http
                 if(proceed === true){
                     auth.register($scope.user).error(function(error){
                         $scope.show_error = true;
-                        $scope.error_message = error;
+                        $scope.error_message = error.message;
                     }).then(function(){
                         $state.go('pending');
                     });
@@ -367,7 +389,7 @@ app.controller('AuthCtrl', ['$scope', '$state', 'auth', 'info', 'hermes', '$http
             $scope.logIn = function(){
                 auth.logIn($scope.user).error(function(error){
                     $scope.show_error = true;
-                    $scope.error_message = error;
+                    $scope.error_message = error.message;
                 }).then(function(){
                     $state.go('home');
                 });
@@ -378,10 +400,33 @@ app.directive('username',['$http','info',"$q",function($http, info, $q) {
     return {
         require: 'ngModel',
         link: function(scope, elm, attrs, ctrl) {
+
             ctrl.$asyncValidators.usernameExists = function(username) {
+
                 return $http.get("/check_username/"+username).then(function(response) {
                     return response.data.username_taken == true ? $q.reject(response.data.errorMessage) : true;
                 });
+            }
+        }
+    };
+}]);
+
+app.directive('membername',['$http','info',"$q","auth",function($http, info, $q, auth) {
+    return {
+        require: 'ngModel',
+        link: function(scope, elm, attrs, ctrl) {
+            ctrl.$asyncValidators.membernameExists = function(membername) {
+                //alert(membername);
+
+                //var str = "?membername="+membername+"&groupname="+auth.currentUser();
+                var nm = {};
+                nm.membername = membername;
+                nm.groupname = auth.currentUser();
+
+                return $http.post("/check_membername/",nm).then(function(response) {
+                    return response.data.membername_taken == true ? $q.reject(response.data.errorMessage) : true;
+                });
+
             }
         }
     };

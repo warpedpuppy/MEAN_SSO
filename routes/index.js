@@ -3,11 +3,13 @@ var router = express.Router();
 var passport = require('passport');
 var mongoose = require('mongoose');
 var User = mongoose.model('User');
+
+
 var Member = mongoose.model('Member');
 var jwt = require('express-jwt');
 var nodemailer = require('nodemailer');
 var crypto = require('crypto');
-var env       = process.env.NODE_ENV || "development";
+var env = new User().env();
 var config    = require(__dirname + '/../config/config.json')[env];
 var auth = jwt({secret:process.env[config.secret_var_name], userProperty: 'payload'});
 
@@ -40,8 +42,9 @@ if (env == 'development'){
   });
 }
 var failCallback = function (req, res, next, nextValidRequestDate) {
-  req.flash('error', "You've made too many failed attempts in a short period of time, please try again "+moment(nextValidRequestDate).fromNow());
-  res.redirect('/login'); // brute force protection triggered, send them back to the login page
+  return res.status(400).json({message: "You've made too many failed attempts in a short period of time, please try again "+moment(nextValidRequestDate).fromNow()});
+ // req.flash('error', "You've made too many failed attempts in a short period of time, please try again "+moment(nextValidRequestDate).fromNow());
+ // res.redirect('/login'); // brute force protection triggered, send them back to the login page
 };
 var handleStoreError = function (error) {
   log.error(error); // log this error so we can figure out what went wrong
@@ -118,11 +121,19 @@ router.post('/login', globalBruteforce.prevent,
 /* GET home page. */
 router.get('/', function(req, res, next) {
 
-  var recaptcha = new Recaptcha(PUBLIC_KEY, PRIVATE_KEY);
+  //var recaptcha = new Recaptcha(PUBLIC_KEY, PRIVATE_KEY);
 
 
   res.render('index');
 });
+
+
+/* GET home page. */
+router.get('/get_public_key', function(req, res, next) {
+
+  res.json({PUBLIC_KEY:PUBLIC_KEY});
+});
+
 
 
 router.post('/empty_dbs',function(req, res, next) {
@@ -151,18 +162,18 @@ router.get('/delete_member/:d', function(req, res) {
   console.log("member to delete = "+member_to_delete);
 
 
-  //not working
-  Member.find({ id:member_to_delete }).remove(function(err, removed){
 
-    console.log("removed = "+removed)
+
+  Member.remove({ _id:member_to_delete }, function(err) {
+    if (!err) {
+      res.json({success:true})
+    }
+    else {
+      res.json({success:false})
+    }
   });
-/*
 
-  Member.remove({ id:member_to_delete }, function(err, removed){
 
-    console.log("removed = "+removed)
-  });
-*/
 
 
 });
@@ -336,6 +347,25 @@ router.post('/reset_password/',function(req, res, next) {
     }
 
   });
+});
+router.post('/check_membername/', function(req, res, next) {
+
+  var check_membername = req.body.membername.toLowerCase();
+  var check_groupname = req.body.groupname.toLowerCase();
+
+
+
+  Member.findOne({'membername':check_membername, 'groupname':check_groupname}, function(err,user){
+
+
+    if(user)
+      membername_taken = true;
+    else
+      membername_taken = false;
+
+    res.json({membername_taken:membername_taken})
+
+  })
 });
 
 
